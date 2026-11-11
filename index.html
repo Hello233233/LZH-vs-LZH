@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>吏治壕 大战 理智耗 · 指尖对决</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='21' cy='32' r='15' fill='%235ccbff'/%3E%3Ccircle cx='43' cy='32' r='15' fill='%235af7b8'/%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   基础
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+:root{
+  --bg0:#04060d;
+  --gold:#ffd76a;
+  --font-cn:"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Heiti SC",sans-serif;
+  --font-num:"Impact","Haettenschweiler","Arial Black","Microsoft YaHei",var(--font-cn);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg0)}
+body{
+  font-family:var(--font-cn);color:#e8f1ff;
+  -webkit-font-smoothing:antialiased;
+  user-select:none;-webkit-user-select:none;
+  touch-action:manipulation;
+  cursor:default;
+}
+img{display:block;-webkit-user-drag:none;user-select:none}
+button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer}
+
+#viewport{position:fixed;inset:0;overflow:hidden;
+  background:radial-gradient(120% 120% at 50% 45%,#0a1122 0%,#04060d 55%,#010204 100%)}
+#design{position:absolute;left:50%;top:50%;width:1600px;height:900px;
+  transform-origin:center center;will-change:transform}
+
+/* ============================================================
+   背景
+   ============================================================ */
+#bg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.bg-glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.g1{left:-420px;top:-200px;width:1200px;height:1100px;
+  background:radial-gradient(circle,rgba(26,108,220,.50),transparent 62%);animation:glowBreath 7s ease-in-out infinite}
+.g2{right:-420px;top:-160px;width:1200px;height:1100px;
+  background:radial-gradient(circle,rgba(18,190,140,.38),transparent 62%);animation:glowBreath 8.5s ease-in-out infinite reverse}
+.g3{left:50%;top:52%;width:1000px;height:560px;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse,rgba(120,150,255,.13),transparent 70%)}
+@keyframes glowBreath{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+
+.floor{position:absolute;left:-25%;right:-25%;bottom:-4%;height:48%;
+  background-image:
+    linear-gradient(rgba(120,180,255,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,180,255,.16) 1px,transparent 1px);
+  background-size:70px 70px,70px 70px;
+  transform:perspective(520px) rotateX(73deg);
+  transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top,#000 2%,transparent 78%);
+  mask-image:linear-gradient(to top,#000 2%,transparent 78%);
+  opacity:.55;
+  animation:floorScroll 5s linear infinite;
+}
+@keyframes floorScroll{to{background-position:0 70px,0 0}}
+
+.pillars{position:absolute;inset:0;pointer-events:none}
+.pillar{position:absolute;top:8%;width:220px;height:84%;filter:blur(46px);opacity:.34}
+.pillar.pl{left:8%;background:linear-gradient(to bottom,transparent,rgba(70,170,255,.85),transparent)}
+.pillar.pr{right:8%;background:linear-gradient(to bottom,transparent,rgba(60,255,180,.75),transparent)}
+
+.divider{position:absolute;left:50%;top:10%;height:80%;width:2px;
+  background:linear-gradient(to bottom,transparent,rgba(150,200,255,.30),rgba(150,200,255,.08),transparent);
+  filter:blur(.6px)}
+
+.scanlines{position:absolute;inset:0;pointer-events:none;opacity:.16;
+  background:repeating-linear-gradient(to bottom,rgba(120,190,255,.16) 0 1px,transparent 1px 4px);
+  mix-blend-mode:overlay}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 44%,transparent 30%,rgba(0,0,0,.42) 72%,rgba(0,0,0,.86) 100%)}
+
+/* ============================================================
+   舞台
+   ============================================================ */
+#shake{position:absolute;inset:0;z-index:2;transform-origin:50% 50%;will-change:transform}
+#fx{position:absolute;inset:0;z-index:4;pointer-events:none}
+#fighters{position:absolute;inset:0;z-index:3}
+#floats{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
+
+/* ============================================================
+   角色
+   ============================================================ */
+.fighter{
+  position:absolute;top:0;height:100%;width:600px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;cursor:pointer;
+  transition:filter .5s ease;
+}
+.fighter.left{left:-8px;--dir:1}
+.fighter.right{right:-8px;--dir:-1}
+.fighter.left{--accent:#5ccbff;--accent2:#2a7dff;--deep:#0a3f8f;
+  --glow:rgba(92,203,255,.55);--tint:rgba(32,116,255,.55)}
+.fighter.right{--accent:#5af7b8;--accent2:#12d99a;--deep:#076b4c;
+  --glow:rgba(90,247,184,.55);--tint:rgba(20,214,150,.5)}
+
+.side-tag{
+  font-size:12px;letter-spacing:.42em;color:var(--accent);opacity:.72;
+  padding-left:.42em;font-weight:600;
+}
+.nameplate{display:flex;align-items:baseline;gap:14px;margin-top:2px}
+.cname{
+  font-size:42px;font-weight:900;letter-spacing:.05em;line-height:1;
+  background:linear-gradient(180deg,#ffffff 18%,var(--accent) 82%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 22px var(--glow));
+}
+.ctitle{font-size:12px;letter-spacing:.28em;color:var(--accent);opacity:.85;
+  border:1px solid rgba(140,190,255,.35);
+  padding:3px 9px 3px 12px;white-space:nowrap}
+
+.status{width:420px;display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+.fighter.right .status{align-items:flex-end}
+.fighter.right .nameplate{flex-direction:row-reverse}
+
+.hpwrap{display:flex;align-items:center;gap:12px;width:100%}
+.fighter.right .hpwrap{flex-direction:row-reverse}
+.hpnum{font-family:var(--font-num);font-size:26px;line-height:1;letter-spacing:.02em;
+  color:#fff;text-shadow:0 0 16px var(--glow);min-width:96px;text-align:right}
+.fighter.right .hpnum{text-align:left}
+.hpbar{position:relative;flex:1;height:20px;overflow:hidden;
+  transform:skewX(-20deg);
+  background:rgba(2,6,14,.82);
+  border:1px solid rgba(160,200,255,.22);
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.9),0 0 22px rgba(0,0,0,.6);
+}
+.hpghost{position:absolute;inset:0;width:100%;
+  background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,190,190,.75));
+  transition:width .5s cubic-bezier(.4,0,.2,1) .16s;opacity:.75}
+.hpfill{position:absolute;inset:0;width:100%;
+  background:linear-gradient(180deg,var(--accent),var(--deep) 88%);
+  box-shadow:0 0 18px var(--glow),inset 0 0 12px rgba(255,255,255,.35);
+  transition:width .15s cubic-bezier(.2,.85,.3,1)}
+.hpfill::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:translateX(-120%);animation:barShine 3.2s ease-in-out infinite}
+@keyframes barShine{0%,55%{transform:translateX(-120%)}100%{transform:translateX(220%)}}
+.fighter.right .hpfill{left:auto;right:0}
+
+.ragewrap{position:relative;display:flex;align-items:center;gap:9px;width:100%}
+.fighter.right .ragewrap{flex-direction:row-reverse}
+.ragebar{position:relative;flex:1;height:9px;overflow:hidden;transform:skewX(-20deg);
+  background:rgba(4,8,18,.85);border:1px solid rgba(255,255,255,.14)}
+.ragefill{position:absolute;inset:0;width:0%;
+  background:linear-gradient(90deg,#ff9d3d,#ffd76a 60%,#fff5cc);
+  box-shadow:0 0 16px rgba(255,200,90,.75);
+  transition:width .16s ease}
+.ragelabel{font-size:11px;letter-spacing:.28em;color:#b9c8e0;opacity:.7;white-space:nowrap}
+.ultready{font-size:11px;letter-spacing:.16em;color:var(--gold);white-space:nowrap;
+  opacity:0;transform:translateX(-6px);transition:.2s;text-shadow:0 0 14px rgba(255,210,110,.9)}
+.ragewrap.full .ultready{opacity:1;transform:none;animation:readyBlink .9s ease-in-out infinite alternate}
+.ragewrap.full .ragebar{border-color:var(--gold)}
+@keyframes readyBlink{from{opacity:.55}to{opacity:1}}
+
+/* --------- 立绘 --------- */
+.portrait-wrap{position:relative;width:366px;height:470px;display:grid;place-items:center}
+.aura{position:absolute;inset:-16% -8%;
+  background:radial-gradient(closest-side at 50% 52%,var(--glow),rgba(0,0,0,0) 70%);
+  opacity:.5;animation:auraPulse 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes auraPulse{0%,100%{opacity:.36;transform:scale(.94)}50%{opacity:.62;transform:scale(1.04)}}
+
+.parallax{width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .35s cubic-bezier(.2,.8,.3,1);will-change:transform}
+
+.frame{position:relative;width:100%;height:100%;padding:7px;
+  background:linear-gradient(152deg,
+      rgba(214,236,255,.95) 0%,
+      rgba(80,110,160,.55) 16%,
+      rgba(9,16,32,.9) 44%,
+      var(--accent2) 78%,
+      var(--accent) 100%);
+  clip-path:polygon(30px 0,100% 0,100% calc(100% - 30px),calc(100% - 30px) 100%,0 100%,0 30px);
+  filter:drop-shadow(0 26px 60px rgba(0,0,0,.75)) drop-shadow(0 0 26px var(--glow));
+  animation:floaty 5s ease-in-out infinite;
+  transition:filter .3s ease;
+}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fighter:hover .frame{filter:drop-shadow(0 26px 60px rgba(0,0,0,.75)) drop-shadow(0 0 46px var(--glow))}
+.fighter:active .frame{filter:drop-shadow(0 26px 60px rgba(0,0,0,.75)) drop-shadow(0 0 60px var(--glow)) brightness(1.25)}
+
+.frame img{width:100%;height:100%;object-fit:cover;object-position:center 24%;
+  clip-path:polygon(25px 0,100% 0,100% calc(100% - 25px),calc(100% - 25px) 100%,0 100%,0 25px);
+  filter:saturate(.94) contrast(1.07) brightness(.97)}
+.fighter.left .frame img{filter:saturate(1.12) contrast(1.03) brightness(1.48)}
+.frame>div{position:absolute;inset:7px;pointer-events:none;
+  clip-path:polygon(25px 0,100% 0,100% calc(100% - 25px),calc(100% - 25px) 100%,0 100%,0 25px)}
+.tint{background:linear-gradient(168deg,var(--tint) 0%,transparent 46%,rgba(3,6,14,.55) 100%);
+  mix-blend-mode:soft-light;opacity:.9}
+.gloss{background:linear-gradient(118deg,rgba(255,255,255,.22) 0%,transparent 34%,transparent 62%,rgba(255,255,255,.07) 100%)}
+.scan{background:repeating-linear-gradient(to bottom,rgba(0,0,0,.26) 0 1px,transparent 1px 3px);opacity:.3}
+.fade{background:linear-gradient(to top,rgba(3,7,16,.92) 0%,rgba(3,7,16,.28) 16%,transparent 42%)}
+
+/* 角标 */
+.portrait-wrap::before,.portrait-wrap::after{content:"";position:absolute;width:70px;height:70px;
+  border:2px solid var(--accent);opacity:.5;pointer-events:none;transition:opacity .25s}
+.portrait-wrap::before{left:-14px;top:-14px;border-right:0;border-bottom:0}
+.portrait-wrap::after{right:-14px;bottom:-14px;border-left:0;border-top:0}
+.fighter:hover .portrait-wrap::before,.fighter:hover .portrait-wrap::after{opacity:.95}
+
+.combo{position:absolute;top:26px;right:-6px;display:flex;align-items:baseline;gap:6px;
+  opacity:0;transform:scale(.55) rotate(-6deg);transform-origin:right bottom;
+  transition:opacity .16s,transform .18s cubic-bezier(.2,1.6,.4,1);pointer-events:none}
+.fighter.right .combo{right:auto;left:-6px;transform-origin:left bottom;flex-direction:row-reverse}
+.combo.on{opacity:1;transform:scale(1) rotate(-6deg)}
+.combo.pop .cnum{animation:comboPop .22s ease-out}
+@keyframes comboPop{0%{transform:scale(1.45);color:#fff}100%{transform:scale(1)}}
+.cnum{font-family:var(--font-num);font-style:italic;font-size:52px;line-height:1;
+  background:linear-gradient(180deg,#fff 20%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px var(--glow))}
+.cword{font-size:12px;letter-spacing:.24em;color:var(--accent);opacity:.85}
+
+.clickhint{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  font-size:12px;letter-spacing:.3em;color:#cfe3ff;opacity:0;transition:.25s;white-space:nowrap;
+  padding:5px 14px;background:rgba(6,12,24,.82);border:1px solid rgba(150,200,255,.24)}
+.fighter:hover .clickhint{opacity:.9}
+.fighter.attract .clickhint{opacity:.95;animation:attractBlink 1.1s ease-in-out infinite alternate}
+@keyframes attractBlink{from{opacity:.35}to{opacity:1}}
+
+/* --------- 技能条 --------- */
+.skills{display:flex;gap:10px;margin-top:2px}
+.chip{position:relative;width:112px;height:64px;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:linear-gradient(180deg,rgba(14,22,40,.85),rgba(6,10,20,.9));
+  border:1px solid rgba(150,190,255,.16);
+  clip-path:polygon(11px 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px);
+  transition:border-color .2s,box-shadow .2s,transform .2s}
+.chip .ico{font-size:21px;font-weight:900;line-height:1;color:var(--accent);opacity:.95;
+  text-shadow:0 0 14px var(--glow)}
+.chip .nm{font-size:11px;letter-spacing:.08em;color:#a8bcd8}
+.chip.ready{border-color:rgba(150,200,255,.5);
+  box-shadow:0 0 18px rgba(0,0,0,.6),inset 0 0 18px rgba(120,190,255,.16)}
+.chip .cd{position:absolute;inset:0;background:rgba(2,5,12,.82);
+  transform-origin:bottom;transform:scaleY(1);pointer-events:none;transition:transform .1s linear}
+.chip.ult{border-color:rgba(255,214,110,.34);
+  background:linear-gradient(180deg,rgba(58,44,12,.9),rgba(8,12,22,.94))}
+.chip.ult .ico{color:var(--gold);text-shadow:0 0 16px rgba(255,210,110,.9)}
+.chip.ult.ready{animation:ultPulse 1.1s ease-in-out infinite alternate;
+  border-color:var(--gold);box-shadow:0 0 26px rgba(255,210,110,.55),inset 0 0 26px rgba(255,190,80,.2)}
+@keyframes ultPulse{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+.chip.fire{animation:chipFire .28s ease-out}
+@keyframes chipFire{0%{transform:scale(1.14);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
+
+/* 被击倒 / 胜利 */
+.fighter.down{filter:grayscale(.92) brightness(.42);pointer-events:none}
+.fighter.down .frame{animation:none;transform:translateY(26px) rotate(2deg);transition:transform .8s ease}
+.fighter.champion .aura{animation:none;opacity:.95;filter:blur(60px)}
+.fighter.champion .frame{filter:drop-shadow(0 26px 60px rgba(0,0,0,.75)) drop-shadow(0 0 60px var(--gold))}
+
+/* ============================================================
+   中央 UI
+   ============================================================ */
+.center-ui{position:absolute;inset:0;z-index:6;pointer-events:none}
+.vs-emblem{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:420px;height:420px;display:grid;place-items:center;opacity:.34}
+.vs-text{font-family:var(--font-num);font-style:italic;font-size:190px;line-height:1;
+  color:transparent;-webkit-text-stroke:2px rgba(180,215,255,.16);
+  letter-spacing:-.04em;user-select:none}
+.vs-ring{position:absolute;border-radius:50%;border:1px dashed rgba(140,190,255,.16)}
+.r1{width:300px;height:300px;animation:spin 34s linear infinite}
+.r2{width:420px;height:420px;border-style:solid;border-color:rgba(140,190,255,.07);
+  animation:spin 52s linear infinite reverse}
+.r3{width:190px;height:190px;border-color:rgba(140,190,255,.1);animation:spin 22s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.timer{position:absolute;left:50%;top:34px;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;min-width:210px}
+.tnum{font-family:var(--font-num);font-size:66px;line-height:.92;letter-spacing:.04em;
+  color:#fff;text-shadow:0 0 30px rgba(120,190,255,.65),0 4px 0 rgba(0,0,0,.5);
+  transition:color .3s}
+.timer.warn .tnum{color:#ff8080;text-shadow:0 0 32px rgba(255,70,70,.8);animation:warnBeat 1s ease-in-out infinite}
+@keyframes warnBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.tlabel{font-size:11px;letter-spacing:.42em;color:#9fb6d6;padding-left:.42em}
+.tbar{width:210px;height:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.tfill{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),#fff);
+  transform-origin:left;transition:transform .2s linear}
+
+.bottom-hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;font-size:12.5px;letter-spacing:.22em;
+  color:#9db2d0;white-space:nowrap}
+.bottom-hint b{color:#e6f2ff;font-weight:700}
+.dotsep{width:4px;height:4px;border-radius:50%;background:#5b7699}
+
+/* 静音 */
+.sound-btn{position:absolute;left:26px;top:24px;z-index:7;width:38px;height:38px;
+  display:grid;place-items:center;font-size:16px;border:1px solid rgba(150,190,255,.22);
+  background:rgba(8,14,26,.72);opacity:.65;transition:.2s;pointer-events:auto;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.sound-btn:hover{opacity:1;border-color:rgba(180,220,255,.5)}
+
+/* ============================================================
+   特效层
+   ============================================================ */
+#flash{position:absolute;inset:0;z-index:15;pointer-events:none;opacity:0;mix-blend-mode:screen}
+#edgeflash{position:absolute;inset:0;z-index:14;pointer-events:none;opacity:0}
+#banner{position:absolute;left:0;right:0;top:43%;z-index:16;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0}
+#banner.show{animation:bannerIn 1.6s cubic-bezier(.16,.9,.3,1) forwards}
+.b-sub{font-size:13px;letter-spacing:.5em;color:var(--bc,#9fd8ff);padding-left:.5em;
+  text-shadow:0 2px 6px rgba(0,0,0,.95),0 0 18px rgba(0,0,0,.8)}
+.b-name{font-size:78px;font-weight:900;letter-spacing:.1em;line-height:1.05;
+  background:linear-gradient(180deg,#ffffff 22%,var(--bc,#9fd8ff) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:blur(0) drop-shadow(0 3px 2px rgba(0,0,0,.85)) drop-shadow(0 0 26px var(--bc,#9fd8ff));
+  -webkit-text-stroke:1px rgba(0,0,0,.25)}
+@keyframes bannerIn{
+  0%{opacity:0;transform:scale(1.4) translateY(18px);filter:blur(9px) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 26px transparent)}
+  12%{opacity:1;transform:scale(1) translateY(0);filter:blur(0) drop-shadow(0 3px 2px rgba(0,0,0,.85)) drop-shadow(0 0 26px var(--bc,#9fd8ff))}
+  76%{opacity:1;transform:scale(1.02);filter:blur(0) drop-shadow(0 3px 2px rgba(0,0,0,.85)) drop-shadow(0 0 26px var(--bc,#9fd8ff))}
+  100%{opacity:0;transform:scale(1.06) translateY(-12px);filter:blur(5px) drop-shadow(0 3px 2px rgba(0,0,0,.85)) drop-shadow(0 0 26px var(--bc,#9fd8ff))}
+}
+
+.ftext{position:absolute;transform:translate(-50%,-50%);
+  font-family:var(--font-num);font-weight:900;font-size:36px;line-height:1;color:#fff;
+  -webkit-text-stroke:3px rgba(4,8,16,.55);paint-order:stroke fill;
+  text-shadow:0 0 18px currentColor,0 2px 4px rgba(0,0,0,.7);
+  animation:fup .95s cubic-bezier(.16,.84,.3,1) forwards;will-change:transform,opacity;
+  letter-spacing:.02em}
+.ftext.crit{font-size:52px;color:var(--gold);text-shadow:0 0 26px #ffb43a,0 2px 4px rgba(0,0,0,.7)}
+.ftext.ult{font-size:60px;color:#fff;text-shadow:0 0 34px #fff,0 0 70px #8fd8ff}
+.ftext.small{font-size:22px;opacity:.92;font-weight:800}
+.ftext.ko{font-size:120px;color:#fff;letter-spacing:.06em;
+  -webkit-text-stroke:4px rgba(0,0,0,.4);
+  text-shadow:0 0 40px #ff5f7a,0 0 90px #ff2d55,0 6px 0 rgba(0,0,0,.5)}
+@keyframes fup{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}
+  18%{opacity:1;transform:translate(-50%,-76%) scale(1.12)}
+  45%{transform:translate(-50%,-104%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-158%) scale(.9)}
+}
+
+/* ============================================================
+   遮罩层 / 开始 / 结算
+   ============================================================ */
+.overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 48%,rgba(5,9,19,.90),rgba(1,3,7,.985) 72%);
+  backdrop-filter:blur(10px);opacity:0;visibility:hidden;
+  transition:opacity .45s ease,visibility .45s}
+.overlay.show{opacity:1;visibility:visible}
+
+.start-inner{display:flex;flex-direction:column;align-items:center;gap:26px;width:1180px}
+.kicker{font-size:12px;letter-spacing:.72em;color:#7f95b8;padding-left:.72em}
+.title{display:flex;align-items:center;gap:26px;line-height:1}
+.t-name{font-size:78px;font-weight:900;letter-spacing:.06em;
+  background:linear-gradient(180deg,#fff 20%,var(--c) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 34px var(--cg))}
+.t-vs{font-size:34px;font-weight:900;font-style:italic;letter-spacing:.1em;color:var(--gold);
+  text-shadow:0 0 28px rgba(255,200,90,.85);transform:rotate(-7deg)}
+
+.subtitle{font-size:14px;letter-spacing:.34em;color:#8ba3c4;padding-left:.34em;margin-top:-8px}
+
+.duo{display:flex;align-items:center;gap:96px;margin:4px 0 2px}
+.medal{position:relative;width:216px;height:216px;border-radius:50%;padding:5px;
+  background:linear-gradient(150deg,rgba(220,240,255,.9),var(--accent2) 65%,var(--accent));
+  filter:drop-shadow(0 0 30px var(--glow));transition:transform .3s}
+.medal img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 22%;
+  filter:saturate(.95) contrast(1.05)}
+.medal::after{content:"";position:absolute;inset:5px;border-radius:50%;
+  background:linear-gradient(180deg,transparent 40%,rgba(3,6,14,.55) 100%)}
+.medal-cap{position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);
+  font-size:15px;letter-spacing:.18em;color:#dbe9ff;white-space:nowrap;font-weight:700}
+.medal-side{display:flex;flex-direction:column;align-items:center;position:relative}
+.medal-side.left{--accent:#5ccbff;--accent2:#2a7dff;--glow:rgba(92,203,255,.6)}
+.medal-side.right{--accent:#5af7b8;--accent2:#12d99a;--glow:rgba(90,247,184,.6)}
+.medal-side.left .medal img{filter:saturate(1.12) contrast(1.03) brightness(1.48)}
+.center-vs{font-family:var(--font-num);font-style:italic;font-size:88px;color:#fff;
+  opacity:.9;text-shadow:0 0 40px rgba(140,190,255,.6);margin-top:-40px}
+
+.rules{display:flex;gap:34px;margin-top:46px}
+.rule{display:flex;align-items:center;gap:10px;font-size:13px;color:#9fb4d2;letter-spacing:.06em}
+.rule i{display:grid;place-items:center;width:24px;height:24px;font-style:normal;font-size:11px;
+  color:var(--gold);border:1px solid rgba(255,210,110,.45);border-radius:50%}
+.rule b{color:#e8f3ff;font-weight:700}
+
+.btn{position:relative;padding:17px 76px;font-size:19px;font-weight:800;letter-spacing:.4em;
+  color:#04121f;text-indent:.4em;
+  background:linear-gradient(180deg,#fff7dd,var(--gold) 55%,#e8a92c);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);
+  box-shadow:0 0 40px rgba(255,200,90,.45),0 10px 30px rgba(0,0,0,.5);
+  transition:transform .18s,box-shadow .2s,filter .2s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 0 60px rgba(255,200,90,.7),0 14px 34px rgba(0,0,0,.55)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.hollow{background:transparent;color:#cfe2ff;border:1px solid rgba(160,200,255,.4);
+  box-shadow:none;font-size:15px;padding:13px 44px}
+.btn.hollow:hover{background:rgba(120,170,255,.1);box-shadow:none}
+.btn-row{display:flex;align-items:center;gap:18px}
+
+.tips{font-size:11.5px;letter-spacing:.18em;color:#5f7698;margin-top:-6px}
+
+/* ---------- 结算 ---------- */
+.result{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px;width:1000px}
+.r-glow{position:absolute;left:50%;top:230px;width:820px;height:460px;transform:translate(-50%,-50%);
+  filter:blur(70px);opacity:.34;pointer-events:none;z-index:-1;border-radius:50%}
+.r-kicker{font-size:15px;letter-spacing:.7em;color:var(--gold);padding-left:.7em;
+  text-shadow:0 0 24px rgba(255,200,90,.7)}
+.r-hero{display:flex;align-items:center;gap:38px;position:relative}
+.r-avatar{position:relative;isolation:isolate;width:186px;height:186px;border-radius:50%;padding:5px;
+  background:linear-gradient(150deg,#fff,var(--accent2) 60%,var(--accent));
+  filter:drop-shadow(0 0 34px var(--glow))}
+.r-avatar::before{content:"";position:absolute;inset:-52px;border-radius:50%;z-index:-1;
+  background:radial-gradient(circle,var(--glow),transparent 66%);filter:blur(26px);opacity:.8}
+.r-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 22%;
+  filter:saturate(.98) contrast(1.05) brightness(1.06)}
+.r-hero.left .r-avatar img{filter:saturate(1.12) contrast(1.03) brightness(1.52)}
+.r-hero.left{--accent:#5ccbff;--accent2:#2a7dff;--glow:rgba(92,203,255,.6)}
+.r-hero.right{--accent:#5af7b8;--accent2:#12d99a;--glow:rgba(90,247,184,.6)}
+.r-info{display:flex;flex-direction:column;gap:8px}
+.r-name{font-size:56px;font-weight:900;letter-spacing:.06em;
+  background:linear-gradient(180deg,#fff 20%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 30px var(--glow))}
+.r-win{font-size:15px;letter-spacing:.46em;color:var(--gold);padding-left:.46em}
+.r-quote{font-size:13px;color:#8fa6c6;letter-spacing:.08em;max-width:380px;line-height:1.65}
+
+.r-stats{display:grid;grid-template-columns:1fr 200px 1fr;gap:11px 26px;width:640px;
+  padding:16px 30px 18px;background:rgba(8,14,26,.58);
+  border:1px solid rgba(140,180,255,.14);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px)}
+.rs-head{grid-column:1/-1;display:grid;grid-template-columns:1fr 200px 1fr;
+  font-size:12px;letter-spacing:.2em;color:#6f87a8;
+  padding-bottom:10px;margin-bottom:2px;border-bottom:1px solid rgba(140,180,255,.12)}
+.rs-head .l{text-align:left;color:#7fc6ff}
+.rs-head .c{text-align:center}
+.rs-head .r{text-align:right;color:#7dffc4}
+.rs-cell{font-family:var(--font-num);font-size:27px;color:#fff;line-height:1.15;padding:0 14px}
+.rs-cell.r{text-align:left}
+.rs-cell.l{text-align:right}
+.rs-key{font-family:var(--font-cn);font-size:11.5px;letter-spacing:.2em;color:#7d93b3;text-align:center;
+  align-self:center}
+.rs-key small{display:block;font-size:10px;opacity:.5;letter-spacing:.1em;margin-top:2px}
+.r-fate{font-size:13px;letter-spacing:.12em;color:#b7cae4;text-align:center;max-width:720px;line-height:1.7}
+.r-fate b{color:var(--gold);font-weight:700}
+.r-meta{font-size:12px;letter-spacing:.22em;color:#6f87a8;text-align:center}
+
+/* ---------- 联机 ---------- */
+.fighter.rival{cursor:default}
+.fighter.rival:hover .clickhint{opacity:.45}
+.fighter.mine .clickhint{opacity:.62}
+.fighter.mine:hover .clickhint{opacity:1}
+
+.net-inner{display:flex;flex-direction:column;align-items:center;gap:16px;width:1120px}
+.net-inner[hidden]{display:none}
+.net-title{font-size:38px;font-weight:900;letter-spacing:.16em;
+  background:linear-gradient(180deg,#fff 20%,#9fd8ff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 28px rgba(120,200,255,.55))}
+.net-card{display:flex;flex-direction:column;align-items:center;gap:16px;width:760px;
+  padding:26px 34px;background:rgba(9,16,29,.72);border:1px solid rgba(140,180,255,.16);
+  clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px)}
+.net-card[hidden]{display:none}
+.net-addr{display:flex;align-items:center;gap:14px;font-size:13px;color:#93a9c8;letter-spacing:.16em}
+.net-addr[hidden]{display:none}
+.net-input{background:rgba(3,7,15,.92);border:1px solid rgba(140,190,255,.28);color:#e8f3ff;
+  font-family:inherit;font-size:15px;padding:11px 16px;outline:none;letter-spacing:.1em;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  transition:border-color .2s,box-shadow .2s}
+.net-input:focus{border-color:rgba(120,210,255,.85);box-shadow:0 0 22px rgba(90,190,255,.25)}
+.net-input.wide{width:340px;text-align:center;font-family:var(--font-num);font-size:18px;letter-spacing:.06em}
+.net-input.code{width:160px;text-align:center;font-family:var(--font-num);font-size:28px;
+  letter-spacing:.3em;padding-left:.3em}
+.net-input::placeholder{color:#4f6382;letter-spacing:.14em;font-family:var(--font-cn);font-size:13px}
+.net-split{display:flex;align-items:center;gap:18px}
+.net-or{font-size:12px;color:#63789a;letter-spacing:.2em}
+.net-msg{font-size:13px;color:#8ba3c4;letter-spacing:.08em;text-align:center;min-height:18px;line-height:1.6}
+.net-msg.err{color:#ff8f9c}
+.net-msg.ok{color:#7dffc4}
+.room-code{font-family:var(--font-num);font-size:96px;line-height:1;letter-spacing:.22em;
+  background:linear-gradient(180deg,#fff,#5ccbff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 40px rgba(92,203,255,.7))}
+.net-wait{font-size:13px;letter-spacing:.3em;color:#9fb6d6}
+.net-ready-title{font-size:26px;font-weight:900;letter-spacing:.24em;color:#7dffc4;
+  text-shadow:0 0 30px rgba(60,240,180,.6)}
+.net-vs-line{display:flex;align-items:center;gap:26px;font-size:22px;letter-spacing:.16em;color:#dcebff}
+.net-vs-line b{color:var(--gold);font-style:italic;font-size:26px}
+#netMe{color:#5ccbff}
+#netRival{color:#5af7b8}
+.net-tip{font-size:12px;color:#5f7698;letter-spacing:.1em;text-align:center;line-height:1.9}
+.btn.small{padding:10px 32px;font-size:13px;letter-spacing:.3em;text-indent:.3em}
+
+.net-hud{position:absolute;right:26px;top:24px;z-index:8;display:flex;align-items:center;gap:9px;
+  padding:8px 15px;font-size:12px;letter-spacing:.14em;color:#c7dcf6;
+  background:rgba(8,14,26,.78);border:1px solid rgba(140,190,255,.26);
+  opacity:0;transform:translateY(-6px);transition:.3s;pointer-events:none;
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.net-hud.show{opacity:1;transform:none}
+.net-hud .dot{width:6px;height:6px;border-radius:50%;background:#5dffa8;box-shadow:0 0 10px #5dffa8}
+.net-hud.lag .dot{background:#ffb020;box-shadow:0 0 10px #ffb020}
+
+.toast{position:absolute;left:50%;top:160px;z-index:17;transform:translate(-50%,-10px);
+  padding:11px 24px;background:rgba(7,14,26,.92);border:1px solid rgba(150,200,255,.34);
+  font-size:13px;letter-spacing:.14em;color:#e6f2ff;opacity:0;transition:.25s;pointer-events:none;
+  white-space:nowrap;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-height:720px){
+  .rules{margin-top:26px}
+  .duo{gap:70px}
+}
+</style>
+</head>
+<body>
+<div id="viewport">
+  <div id="design">
+
+    <!-- 背景 -->
+    <div id="bg">
+      <div class="bg-glow g1"></div>
+      <div class="bg-glow g2"></div>
+      <div class="bg-glow g3"></div>
+      <div class="floor"></div>
+      <div class="pillars"><div class="pillar pl"></div><div class="pillar pr"></div></div>
+      <div class="divider"></div>
+      <div class="scanlines"></div>
+      <div class="vignette"></div>
+    </div>
+
+    <!-- 舞台 -->
+    <div id="shake">
+      <div id="fighters"></div>
+      <canvas id="fx" width="1600" height="900"></canvas>
+      <div id="floats"></div>
+
+      <div class="center-ui">
+        <div class="vs-emblem">
+          <i class="vs-ring r1"></i><i class="vs-ring r2"></i><i class="vs-ring r3"></i>
+          <span class="vs-text">VS</span>
+        </div>
+        <div class="timer" id="timer">
+          <div class="tnum" id="tnum">90</div>
+          <div class="tbar"><div class="tfill" id="tfill"></div></div>
+          <div class="tlabel">决胜倒计时</div>
+        </div>
+        <div class="bottom-hint">
+          <span>点击<b>左右角色</b>出招</span>
+          <i class="dotsep"></i>
+          <span>怒气满格释放<b>终极技</b></span>
+          <i class="dotsep"></i>
+          <span>连击越高伤害越猛</span>
+        </div>
+        <div class="net-hud" id="netHud"><i class="dot"></i><span id="netHudTxt">联机中</span></div>
+      </div>
+      <div class="toast" id="toast"></div>
+      <button class="sound-btn" id="soundBtn" title="音效开关">🔊</button>
+    </div>
+
+    <div id="edgeflash"></div>
+    <div id="flash"></div>
+    <div id="banner"><div class="b-sub"></div><div class="b-name"></div></div>
+
+    <!-- 开始界面 -->
+    <div class="overlay show" id="overlay">
+      <div class="start-inner" id="startInner">
+        <div class="kicker">S L G · 指 尖 对 决</div>
+        <div class="title">
+          <span class="t-name" style="--c:#5ccbff;--cg:rgba(92,203,255,.55)">吏治壕</span>
+          <span class="t-vs">VS</span>
+          <span class="t-name" style="--c:#5af7b8;--cg:rgba(90,247,184,.55)">理智耗</span>
+        </div>
+        <div class="subtitle">霜 锋 剑 客 &nbsp;·&nbsp; 青 莲 术 士</div>
+
+        <div class="duo">
+          <div class="medal-side left">
+            <div class="medal"><img src="assets/jianwen.jpg" alt="吏治壕" draggable="false"></div>
+            <div class="medal-cap">吏治壕</div>
+          </div>
+          <div class="center-vs">VS</div>
+          <div class="medal-side right">
+            <div class="medal"><img src="assets/jingwen.jpg" alt="理智耗" draggable="false"></div>
+            <div class="medal-cap">理智耗</div>
+          </div>
+        </div>
+
+        <div class="rules">
+          <div class="rule"><i>1</i><span>点击 <b>任意角色</b>，他便立即出招</span></div>
+          <div class="rule"><i>2</i><span>怒气满格，下一击为 <b>终极技</b></span></div>
+          <div class="rule"><i>3</i><span>90 秒内打空对方血量即 <b>KO</b></span></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="startBtn">开始对决</button>
+          <button class="btn hollow" id="netBtn">联 机 对 战</button>
+        </div>
+        <div class="tips">两 边 都 能 点 · 你 的 鼠 标 决 定 谁 赢</div>
+      </div>
+
+      <!-- 联机大厅 -->
+      <div class="net-inner" id="netInner" hidden>
+        <div class="kicker">L A N · 联 机 对 战</div>
+        <div class="net-title">同 一 战 场 · 两 台 电 脑</div>
+
+        <div class="net-card" id="netSetup">
+          <div class="net-addr" id="netAddrRow">
+            <span>服务器地址</span>
+            <input id="srvInput" class="net-input wide" spellcheck="false" value="127.0.0.1:8080" />
+          </div>
+          <div class="net-split">
+            <button class="btn" id="createBtn">创 建 房 间</button>
+            <span class="net-or">或</span>
+            <input id="codeInput" class="net-input code" maxlength="4" inputmode="numeric" placeholder="房间号" />
+            <button class="btn hollow" id="joinBtn">加 入</button>
+          </div>
+          <div class="net-msg" id="netMsg">房主先「创建房间」，把 4 位房间号发给对手</div>
+        </div>
+
+        <div class="net-card" id="netWait" hidden>
+          <div class="net-wait">等 待 对 手 加 入</div>
+          <div class="room-code" id="roomCode">----</div>
+          <div class="net-msg" id="netWaitMsg">让对手打开同一网址，输入这个房间号</div>
+          <button class="btn hollow small" id="cancelBtn">取 消 房 间</button>
+        </div>
+
+        <div class="net-card" id="netReady" hidden>
+          <div class="net-ready-title" id="netReadyTitle">对 手 已 就 位</div>
+          <div class="net-vs-line"><span id="netMe">吏治壕</span><b>VS</b><span id="netRival">理智耗</span></div>
+          <div class="net-msg" id="netReadyMsg"></div>
+          <div class="btn-row">
+            <button class="btn" id="netStartBtn">开 始 对 战</button>
+            <button class="btn hollow" id="netLeaveBtn">退 出 房 间</button>
+          </div>
+        </div>
+
+        <div class="net-tip">房主运行「启动联机.bat」，双方浏览器打开它打印的地址（Radmin IP）<br>只有房主的电脑需要开服务器 · 无需任何账号</div>
+        <button class="btn hollow small" id="netBackBtn">返 回 主 页</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================
+   配置
+   ============================================================ */
+const DW = 1600, DH = 900;
+const CFG = {
+  hp: 3200,
+  timeLimit: 90,
+  basicDmg: [12, 17],
+  basicRage: 7,
+  autoDmg: [12, 18],
+  autoMin: 2400, autoMax: 3400,
+  clickGate: 95,
+  comboWindow: 1400,
+  maxCombo: 30,
+  critChance: 0.11,
+};
+
+const HERO = {
+  left: {
+    key:'left', name:'吏治壕', title:'传奇大吊', tag:'蓝 方 · 冰 脉', img:'assets/jianwen.jpg',
+    color:'#8fd8ff', autoColor:'#7fd4ff',
+    quote:'“霜华所至，寸草不生。”',
+    skills: [
+      {name:'飞天大草', ico:'霜', cd:1000, dmg:34, rage:12, kind:'shards', color:'#8fd8ff'},
+      {name:'菊花对人', ico:'冰', cd:2300, dmg:64, rage:18, kind:'lunge', color:'#4aa8ff'},
+      {name:'倒车入库', ico:'零', cd:0, dmg:300, rage:0, kind:'ult', style:'ice', color:'#bfe9ff',
+       sub:'终 极 奥 义 · 一 柜 子 酸 奶'},
+    ],
+  },
+  right: {
+    key:'right', name:'理智耗', title:'青莲术士', tag:'绿 方 · 青 莲', img:'assets/jingwen.jpg',
+    color:'#8dffd0', autoColor:'#7dffc4',
+    quote:'“一莲开，万法寂。”',
+    skills: [
+      {name:'翠影三连', ico:'翠', cd:1000, dmg:34, rage:12, kind:'arcs', color:'#8dffd0'},
+      {name:'青莲破', ico:'莲', cd:2300, dmg:64, rage:18, kind:'lotus', color:'#37f5b0'},
+      {name:'万象归一', ico:'归', cd:0, dmg:300, rage:0, kind:'ult', style:'lotus', color:'#b6ffe4',
+       sub:'终 极 奥 义 · 青 莲 焚 天'},
+    ],
+  },
+};
+
+const KEYS = ['left','right'];
+const other = k => (k === 'left' ? 'right' : 'left');
+const rand = (a,b) => a + Math.random() * (b - a);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const now = () => performance.now();
+
+/* ============================================================
+   DOM
+   ============================================================ */
+const design    = document.getElementById('design');
+const stage     = document.getElementById('shake');
+const fighterHost = document.getElementById('fighters');
+const canvas    = document.getElementById('fx');
+const ctx       = canvas.getContext('2d');
+const floatLayer= document.getElementById('floats');
+const flashEl   = document.getElementById('flash');
+const edgeEl    = document.getElementById('edgeflash');
+const bannerEl  = document.getElementById('banner');
+const overlayEl = document.getElementById('overlay');
+const timerEl   = document.getElementById('timer');
+const tnumEl    = document.getElementById('tnum');
+const tfillEl   = document.getElementById('tfill');
+const soundBtn  = document.getElementById('soundBtn');
+
+/* ============================================================
+   音频
+   ============================================================ */
+const SFX = {
+  ctx:null, master:null, buf:null, muted:false,
+  init(){
+    if (this.ctx) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 0.42;
+      this.master.connect(this.ctx.destination);
+      const len = Math.floor(this.ctx.sampleRate * 0.7);
+      this.buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const d = this.buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    } catch(e) { this.ctx = null; }
+  },
+  on(){ return this.ctx && !this.muted; },
+  resume(){ if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); },
+  noise(dur, o){
+    if (!this.on()) return;
+    o = o || {};
+    const c = this.ctx, t = c.currentTime;
+    const src = c.createBufferSource(); src.buffer = this.buf;
+    const f = c.createBiquadFilter();
+    f.type = o.type || 'bandpass';
+    f.frequency.setValueAtTime(o.freq || 1200, t);
+    if (o.slide) f.frequency.exponentialRampToValueAtTime(o.slide, t + dur);
+    f.Q.value = o.q == null ? 1 : o.q;
+    const g = c.createGain();
+    g.gain.setValueAtTime(o.gain || 0.2, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t); src.stop(t + dur + 0.05);
+  },
+  tone(freq, dur, o){
+    if (!this.on()) return;
+    o = o || {};
+    const c = this.ctx, t = c.currentTime + (o.delay || 0);
+    const os = c.createOscillator();
+    os.type = o.type || 'sine';
+    os.frequency.setValueAtTime(freq, t);
+    if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.gain || 0.14, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    os.connect(g); g.connect(this.master);
+    os.start(t); os.stop(t + dur + 0.04);
+  },
+  hit(crit){
+    this.noise(crit ? 0.16 : 0.1, {freq: crit ? 2600 : 1900, q: 1.4, gain: crit ? 0.3 : 0.18});
+    this.tone(crit ? 190 : 150, 0.14, {type:'sine', to: 55, gain: 0.2});
+  },
+  whoosh(){ this.noise(0.2, {type:'highpass', freq: 700, q: 0.6, gain: 0.1}); },
+  cast(){ this.tone(520, 0.12, {type:'triangle', to: 880, gain: 0.07}); },
+  ultCharge(){
+    this.tone(110, 0.85, {type:'sawtooth', to: 760, gain: 0.1});
+    this.noise(0.8, {type:'bandpass', freq: 220, slide: 3400, q: 0.8, gain: 0.16});
+  },
+  ultBoom(){
+    this.noise(0.7, {type:'lowpass', freq: 1400, gain: 0.5});
+    this.tone(120, 0.7, {type:'sine', to: 38, gain: 0.45});
+    this.tone(70, 0.9, {type:'triangle', to: 30, gain: 0.3, delay: 0.04});
+  },
+  ko(){
+    this.noise(1.1, {type:'lowpass', freq: 900, gain: 0.55});
+    this.tone(90, 1.0, {type:'sine', to: 28, gain: 0.5});
+    this.tone(1400, 0.5, {type:'sine', to: 300, gain: 0.08});
+  },
+  ui(){ this.tone(700, 0.08, {type:'square', gain: 0.05}); this.tone(1050, 0.09, {type:'sine', gain: 0.05, delay: 0.05}); },
+};
+
+/* ============================================================
+   画布 & 缩放
+   ============================================================ */
+function sizeCanvas(){
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = DW * dpr;
+  canvas.height = DH * dpr;
+  canvas.style.width = DW + 'px';
+  canvas.style.height = DH + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+let scaleFactor = 1;
+function fit(){
+  scaleFactor = Math.min(window.innerWidth / DW, window.innerHeight / DH);
+  design.style.transform = 'translate(-50%,-50%) scale(' + scaleFactor + ')';
+}
+function toDesign(e){
+  const r = design.getBoundingClientRect();
+  const s = r.width / DW || 1;
+  return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s };
+}
+
+/* ============================================================
+   特效引擎
+   ============================================================ */
+const fx = { parts: [], rings: [], bolts: [], slashes: [], projs: [], lines: [] };
+
+function spark(x, y, o = {}) {
+  const n = o.n == null ? 10 : o.n;
+  for (let i = 0; i < n; i++) {
+    const a = (o.angle || 0) + (Math.random() - 0.5) * (o.spread == null ? Math.PI * 2 : o.spread);
+    const sp = (o.speed == null ? 260 : o.speed) * (0.3 + Math.random());
+    fx.parts.push({
+      k:'s', x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      g: o.g == null ? 700 : o.g,
+      drag: o.drag == null ? 1.3 : o.drag,
+      age:0, life:(o.life == null ? 0.5 : o.life) * (0.65 + Math.random() * 0.7),
+      size:(o.size == null ? 3 : o.size) * (0.55 + Math.random() * 0.9),
+      color:o.color || '#fff', rot:0, vr:0,
+    });
+  }
+}
+function shardBurst(x, y, o = {}) {
+  const n = o.n == null ? 14 : o.n;
+  for (let i = 0; i < n; i++) {
+    const a = (o.angle || 0) + (Math.random() - 0.5) * (o.spread == null ? Math.PI * 2 : o.spread);
+    const sp = (o.speed == null ? 380 : o.speed) * (0.35 + Math.random());
+    fx.parts.push({
+      k:'d', x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      g: o.g == null ? 520 : o.g, drag: 1.1,
+      age:0, life:(o.life == null ? 0.7 : o.life) * (0.7 + Math.random() * 0.6),
+      size:(o.size == null ? 9 : o.size) * (0.5 + Math.random()),
+      color:o.color || '#bfe9ff',
+      rot: Math.random() * 6.28, vr: rand(-7, 7),
+    });
+  }
+}
+function petalBurst(x, y, o = {}) {
+  const n = o.n == null ? 16 : o.n;
+  for (let i = 0; i < n; i++) {
+    const a = (o.angle || 0) + (Math.random() - 0.5) * (o.spread == null ? Math.PI * 2 : o.spread);
+    const sp = (o.speed == null ? 320 : o.speed) * (0.3 + Math.random());
+    fx.parts.push({
+      k:'p', x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      g: o.g == null ? -40 : o.g, drag: 1.5,
+      age:0, life:(o.life == null ? 1.0 : o.life) * (0.7 + Math.random() * 0.6),
+      size:(o.size == null ? 8 : o.size) * (0.6 + Math.random() * 0.8),
+      color:o.color || '#7dffc4',
+      rot: Math.random() * 6.28, vr: rand(-5, 5),
+    });
+  }
+}
+function implode(x, y, o = {}) {
+  const n = o.n == null ? 34 : o.n;
+  const R = o.R == null ? 430 : o.R;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = R * (0.5 + Math.random() * 0.85);
+    const px = x + Math.cos(a) * r;
+    const py = y + Math.sin(a) * r * 0.8;
+    const dur = 0.32 + Math.random() * 0.45;
+    fx.parts.push({
+      k: Math.random() < 0.25 ? 'd' : 's',
+      x: px, y: py,
+      vx: (x - px) / dur, vy: (y - py) / dur,
+      g: 0, drag: 0,
+      age: 0, life: dur,
+      size: 2 + Math.random() * (o.big ? 7 : 3.6),
+      color: o.color || '#9fd8ff', rot: Math.random() * 6.28, vr: rand(-4, 4),
+    });
+  }
+}
+function ring(x, y, o = {}) {
+  fx.rings.push({
+    x, y,
+    r0: o.r0 == null ? 6 : o.r0,
+    r1: o.r1 == null ? 120 : o.r1,
+    age: 0, life: o.life == null ? 0.4 : o.life,
+    color: o.color || '#fff', w: o.w == null ? 4 : o.w,
+    fill: !!o.fill,
+  });
+}
+function bolt(x1, y1, x2, y2, color, o = {}) {
+  const seg = o.seg || 9;
+  const jitter = o.jitter == null ? 26 : o.jitter;
+  const pts = [];
+  const nx = -(y2 - y1), ny = (x2 - x1);
+  const L = Math.hypot(nx, ny) || 1;
+  for (let i = 0; i <= seg; i++) {
+    const t = i / seg;
+    const px = x1 + (x2 - x1) * t;
+    const py = y1 + (y2 - y1) * t;
+    const off = (i === 0 || i === seg) ? 0 : (Math.random() - 0.5) * jitter * 2;
+    pts.push([px + nx / L * off, py + ny / L * off]);
+  }
+  fx.bolts.push({ pts, age: 0, life: o.life || 0.22, color, w: o.w || 3 });
+}
+function slash(x, y, o = {}) {
+  fx.slashes.push({
+    x, y, ang: o.ang == null ? 0 : o.ang,
+    R: o.R == null ? 150 : o.R,
+    thick: o.thick == null ? 36 : o.thick,
+    span: o.span == null ? 1.45 : o.span,
+    age: 0, life: o.life == null ? 0.3 : o.life,
+    color: o.color || '#fff', dir: Math.random() < 0.5 ? 1 : -1,
+  });
+}
+function line(x1, y1, x2, y2, o = {}) {
+  fx.lines.push({ x1, y1, x2, y2, age:0, life: o.life || 0.25, color: o.color || '#fff', w: o.w || 2 });
+}
+function proj(from, to, o = {}) {
+  const x0 = o.x0 == null ? from.ax : o.x0;
+  const y0 = o.y0 == null ? from.ay : o.y0;
+  const x1 = o.x1 == null ? to.ax + rand(-45, 45) : o.x1;
+  const y1 = o.y1 == null ? to.ay + rand(-60, 55) : o.y1;
+  const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+  const nx = -(y1 - y0), ny = (x1 - x0);
+  const L = Math.hypot(nx, ny) || 1;
+  const off = o.arc == null ? 60 : o.arc;
+  fx.projs.push({
+    x0, y0, cx: mx + nx / L * off, cy: my + ny / L * off, x1, y1,
+    t: 0, dur: (o.dur == null ? 330 : o.dur) / 1000,
+    color: o.color || '#fff', r: o.r == null ? 8 : o.r,
+    hist: [], onHit: o.onHit || null,
+  });
+}
+function shake(v){ cam.shake = Math.min(30, cam.shake + v); }
+function cameraZoom(z){ cam.zoomTarget = z; }
+function flash(color, alpha, dur, at){
+  if (at) {
+    flashEl.style.background = 'radial-gradient(circle at ' + at.x.toFixed(0) + 'px ' + at.y.toFixed(0) +
+      'px, ' + color + ' 0%, ' + color + ' 10%, rgba(0,0,0,0) 58%)';
+  } else {
+    flashEl.style.background = color;
+  }
+  flashEl.animate([{opacity: alpha}, {opacity: 0}], {duration: dur || 300, easing:'ease-out'});
+}
+function edgeFlash(color, alpha){
+  edgeEl.style.boxShadow = 'inset 0 0 120px 30px ' + color;
+  edgeEl.animate([{opacity: alpha}, {opacity: 0}], {duration: 320, easing:'ease-out'});
+}
+function floatText(x, y, text, cls) {
+  const el = document.createElement('div');
+  el.className = 'ftext ' + (cls || '');
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  if (cls === 'ult') el.style.textShadow = '0 0 34px #fff, 0 0 80px ' + (state.lastColor || '#8fd8ff');
+  floatLayer.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+function showBanner(name, sub, color) {
+  bannerEl.style.setProperty('--bc', color);
+  bannerEl.querySelector('.b-name').textContent = name;
+  bannerEl.querySelector('.b-sub').textContent = sub || '';
+  bannerEl.classList.remove('show');
+  void bannerEl.offsetWidth;
+  bannerEl.classList.add('show');
+}
+
+/* ------------------------------------------------------------
+   特效更新 & 渲染
+   ------------------------------------------------------------ */
+function updateFx(dt, dtReal) {
+  for (let i = fx.parts.length - 1; i >= 0; i--) {
+    const p = fx.parts[i];
+    p.age += dt;
+    if (p.age >= p.life) { fx.parts.splice(i, 1); continue; }
+    if (p.drag) { p.vx -= p.vx * p.drag * dt; p.vy -= p.vy * p.drag * dt; }
+    p.vy += p.g * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.rot += p.vr * dt;
+  }
+  for (let i = fx.rings.length - 1; i >= 0; i--) {
+    const r = fx.rings[i];
+    r.age += dt;
+    if (r.age >= r.life) fx.rings.splice(i, 1);
+  }
+  for (let i = fx.bolts.length - 1; i >= 0; i--) {
+    const b = fx.bolts[i];
+    b.age += dtReal;
+    if (b.age >= b.life) fx.bolts.splice(i, 1);
+  }
+  for (let i = fx.slashes.length - 1; i >= 0; i--) {
+    const s = fx.slashes[i];
+    s.age += dt;
+    if (s.age >= s.life) fx.slashes.splice(i, 1);
+  }
+  for (let i = fx.lines.length - 1; i >= 0; i--) {
+    const l = fx.lines[i];
+    l.age += dtReal;
+    if (l.age >= l.life) fx.lines.splice(i, 1);
+  }
+  for (let i = fx.projs.length - 1; i >= 0; i--) {
+    const p = fx.projs[i];
+    p.t += dt / p.dur;
+    if (p.t >= 1) {
+      fx.projs.splice(i, 1);
+      if (p.onHit) p.onHit();
+      continue;
+    }
+    const t = p.t;
+    const it = 1 - t;
+    const px = it * it * p.x0 + 2 * it * t * p.cx + t * t * p.x1;
+    const py = it * it * p.y0 + 2 * it * t * p.cy + t * t * p.y1;
+    p.hist.push({ x: px, y: py });
+    if (p.hist.length > 20) p.hist.shift();
+    p.px = px; p.py = py;
+  }
+}
+
+function renderFx(dtReal) {
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,0.42)';
+  ctx.fillRect(0, 0, DW, DH);
+
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+
+  ambientUpdate(dtReal);
+  ambientDraw();
+
+  for (const l of fx.lines) {
+    const a = 1 - l.age / l.life;
+    ctx.globalAlpha = a * 0.7;
+    ctx.strokeStyle = l.color;
+    ctx.lineWidth = l.w * a;
+    ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); ctx.stroke();
+  }
+
+  for (const p of fx.projs) {
+    const h = p.hist;
+    for (let i = 0; i < h.length; i++) {
+      const k = i / h.length;
+      ctx.globalAlpha = k * 0.5;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(h[i].x, h[i].y, p.r * 0.85 * k, 0, 6.2832); ctx.fill();
+    }
+    const cx = p.px == null ? p.x0 : p.px;
+    const cy = p.py == null ? p.y0 : p.py;
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath(); ctx.arc(cx, cy, p.r * 3.2, 0, 6.2832); ctx.fill();
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.arc(cx, cy, p.r * 1.7, 0, 6.2832); ctx.fill();
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(cx, cy, p.r * 0.55, 0, 6.2832); ctx.fill();
+
+    if (h.length > 2) {
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = p.r * 1.1;
+      ctx.beginPath();
+      ctx.moveTo(h[h.length - 3].x, h[h.length - 3].y);
+      ctx.lineTo(cx, cy);
+      ctx.stroke();
+    }
+  }
+
+  for (const p of fx.parts) {
+    const a = 1 - p.age / p.life;
+    ctx.globalAlpha = a;
+    if (p.k === 's') {
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.4, p.size * (0.35 + a * 0.65)), 0, 6.2832);
+      ctx.fill();
+    } else if (p.k === 'd') {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size);
+      ctx.lineTo(p.size * 0.5, 0);
+      ctx.lineTo(0, p.size);
+      ctx.lineTo(-p.size * 0.5, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size, p.size * 0.42, 0, 0, 6.2832);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (const r of fx.rings) {
+    const k = r.age / r.life;
+    const rad = r.r0 + (r.r1 - r.r0) * easeOut(k);
+    const a = 1 - k;
+    ctx.globalAlpha = a * 0.9;
+    ctx.strokeStyle = r.color;
+    ctx.lineWidth = Math.max(0.6, r.w * (1 - k * 0.75));
+    ctx.beginPath(); ctx.arc(r.x, r.y, rad, 0, 6.2832); ctx.stroke();
+    if (r.fill) {
+      ctx.globalAlpha = a * 0.1;
+      ctx.fillStyle = r.color;
+      ctx.fill();
+    }
+  }
+
+  for (const b of fx.bolts) {
+    const a = 1 - b.age / b.life;
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth = b.w;
+    ctx.beginPath();
+    ctx.moveTo(b.pts[0][0], b.pts[0][1]);
+    for (let i = 1; i < b.pts.length; i++) ctx.lineTo(b.pts[i][0], b.pts[i][1]);
+    ctx.stroke();
+    ctx.globalAlpha = a * 0.9;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = Math.max(0.5, b.w * 0.35);
+    ctx.stroke();
+  }
+
+  for (const s of fx.slashes) {
+    const k = s.age / s.life;
+    const grow = easeOut(Math.min(1, k * 2.6));
+    const alpha = 1 - Math.max(0, (k - 0.3) / 0.7);
+    const R = s.R * (0.72 + grow * 0.32);
+    const span = s.span * grow;
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.ang);
+    ctx.scale(1, s.dir);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = s.color;
+    ctx.shadowColor = s.color;
+    ctx.shadowBlur = 26;
+    ctx.beginPath();
+    ctx.arc(0, 0, R, -span, span);
+    ctx.arc(0, 0, R - s.thick, span, -span, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(0, 0, R - s.thick * 0.5, -span * 0.92, span * 0.92);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* 环境粒子 */
+const ambient = [];
+function ambientInit() {
+  ambient.length = 0;
+  for (let i = 0; i < 74; i++) ambient.push(ambientSpawn(true));
+}
+function ambientSpawn(init) {
+  const side = Math.random() < 0.5 ? 'l' : 'r';
+  return {
+    side,
+    x: side === 'l' ? rand(-60, 620) : rand(980, 1660),
+    y: init ? rand(0, DH) : rand(-40, DH),
+    vx: side === 'l' ? rand(6, 26) : rand(-26, -6),
+    vy: rand(-16, -3),
+    size: rand(0.7, 2.4),
+    a: rand(0.15, 0.55),
+    ph: rand(0, 6.28),
+    k: side === 'l' ? 'snow' : 'petal',
+    rot: rand(0, 6.28),
+    vr: rand(-0.8, 0.8),
+  };
+}
+function ambientUpdate(dt) {
+  for (let i = 0; i < ambient.length; i++) {
+    const p = ambient[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.ph += dt * 1.6;
+    p.x += Math.sin(p.ph) * 0.22;
+    p.rot += p.vr * dt;
+    if (p.y < -50 || p.x < -90 || p.x > DW + 90) ambient[i] = ambientSpawn(false);
+  }
+}
+function ambientDraw() {
+  for (const p of ambient) {
+    ctx.globalAlpha = p.a * 0.8;
+    if (p.k === 'snow') {
+      ctx.fillStyle = '#cfeaff';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 6.2832); ctx.fill();
+    } else {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = '#8dffc4';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size * 1.8, p.size * 0.8, 0, 0, 6.2832);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* 摄像机 */
+const cam = { shake: 0, zoom: 1, zoomTarget: 1 };
+function updateCam(dt) {
+  cam.shake *= Math.pow(0.0025, dt);
+  if (cam.shake < 0.25) cam.shake = 0;
+  const k = 1 - Math.pow(0.001, dt);
+  cam.zoom += (cam.zoomTarget - cam.zoom) * Math.min(1, k * 1.6);
+  const s = cam.shake;
+  const dx = (Math.random() - 0.5) * s;
+  const dy = (Math.random() - 0.5) * s;
+  const rot = (Math.random() - 0.5) * s * 0.0012;
+  stage.style.transform = 'translate3d(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px,0) rotate(' + rot.toFixed(4) + 'rad) scale(' + cam.zoom.toFixed(4) + ')';
+}
+
+/* ============================================================
+   游戏状态
+   ============================================================ */
+const state = {
+  running:false, over:false, timeScale:1,
+  timeLeft: CFG.timeLimit, token:0, lastColor:'#8fd8ff',
+  stats: {},
+};
+let S = {};
+
+function freshStats() {
+  return {
+    left:  { clicks:0, dmg:0, maxCombo:0, ults:0 },
+    right: { clicks:0, dmg:0, maxCombo:0, ults:0 },
+  };
+}
+
+/* ============================================================
+   角色构建
+   ============================================================ */
+function fighterMarkup(k) {
+  const d = HERO[k];
+  const chips = d.skills.map((sk, i) =>
+    '<div class="chip' + (sk.kind === 'ult' ? ' ult' : '') + '" data-chip="' + i + '">' +
+      '<span class="ico">' + sk.ico + '</span>' +
+      '<span class="nm">' + sk.name + '</span>' +
+      '<i class="cd"></i>' +
+    '</div>'
+  ).join('');
+  return '' +
+    '<section class="fighter ' + k + '" data-side="' + k + '">' +
+      '<div class="side-tag">' + d.tag + '</div>' +
+      '<div class="status">' +
+        '<div class="nameplate">' +
+          '<span class="cname">' + d.name + '</span>' +
+          '<span class="ctitle">' + d.title + '</span>' +
+        '</div>' +
+        '<div class="hpwrap">' +
+          '<div class="hpnum">' + CFG.hp + '</div>' +
+          '<div class="hpbar"><div class="hpghost"></div><div class="hpfill"></div></div>' +
+        '</div>' +
+        '<div class="ragewrap">' +
+          '<span class="ragelabel">怒 气</span>' +
+          '<div class="ragebar"><div class="ragefill"></div></div>' +
+          '<span class="ultready">终极就绪</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="portrait-wrap">' +
+        '<div class="aura"></div>' +
+        '<div class="parallax">' +
+          '<div class="frame">' +
+            '<img src="' + d.img + '" alt="' + d.name + '" draggable="false">' +
+            '<div class="tint"></div><div class="gloss"></div>' +
+            '<div class="scan"></div><div class="fade"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="combo"><span class="cnum">×2</span><span class="cword">连 击</span></div>' +
+        '<div class="clickhint">点 击 出 招</div>' +
+      '</div>' +
+      '<div class="skills">' + chips + '</div>' +
+    '</section>';
+}
+
+function buildFighters() {
+  fighterHost.innerHTML = fighterMarkup('left') + fighterMarkup('right');
+  S = {};
+  for (const k of KEYS) {
+    const root = fighterHost.querySelector('.fighter[data-side="' + k + '"]');
+    S[k] = {
+      key: k, cfg: HERO[k], el: root,
+      wrapEl: root.querySelector('.portrait-wrap'),
+      frameEl: root.querySelector('.frame'),
+      hpEl: root.querySelector('.hpfill'),
+      ghostEl: root.querySelector('.hpghost'),
+      numEl: root.querySelector('.hpnum'),
+      rageEl: root.querySelector('.ragefill'),
+      rageWrapEl: root.querySelector('.ragewrap'),
+      comboEl: root.querySelector('.combo'),
+      comboNumEl: root.querySelector('.cnum'),
+      chips: Array.prototype.slice.call(root.querySelectorAll('.chip')),
+      hp: CFG.hp, maxHp: CFG.hp, rage: 0,
+      combo: 0, lastClick: -99999, nextClickAt: 0,
+      cd: [0, 0, 0], nextAuto: 0, ultBusy: false,
+      ax: 400, ay: 450,
+    };
+    S[k].skills = HERO[k].skills;
+    root.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      onFighterClick(k, e);
+    });
+  }
+  anchors();
+}
+
+function anchors() {
+  const prev = stage.style.transform;
+  stage.style.transform = 'none';
+  const host = design.getBoundingClientRect();
+  const s = (host.width / DW) || 1;
+  for (const k of KEYS) {
+    const r = S[k].wrapEl.getBoundingClientRect();
+    S[k].ax = (r.left - host.left) / s + r.width / (2 * s);
+    S[k].ay = (r.top - host.top) / s + r.height / (2 * s) - 34;
+  }
+  stage.style.transform = prev;
+}
+
+/* ============================================================
+   UI 更新
+   ============================================================ */
+function updateHp(s) {
+  const pct = clamp(s.hp / s.maxHp, 0, 1) * 100;
+  s.hpEl.style.width = pct.toFixed(2) + '%';
+  s.ghostEl.style.width = pct.toFixed(2) + '%';
+  s.numEl.textContent = Math.ceil(s.hp);
+}
+function updateRage(s) {
+  s.rageEl.style.width = clamp(s.rage, 0, 100).toFixed(1) + '%';
+  s.rageWrapEl.classList.toggle('full', s.rage >= 100);
+}
+function updateComboUI(s) {
+  if (s.combo >= 2) {
+    s.comboEl.classList.add('on');
+    s.comboNumEl.textContent = '×' + s.combo;
+    s.comboEl.classList.remove('pop');
+    void s.comboEl.offsetWidth;
+    s.comboEl.classList.add('pop');
+  } else {
+    s.comboEl.classList.remove('on');
+  }
+}
+function updateChips() {
+  const t = now();
+  for (const k of KEYS) {
+    const s = S[k];
+    if (!s) continue;
+    for (let i = 0; i < s.chips.length; i++) {
+      const chip = s.chips[i];
+      const cdEl = chip.querySelector('.cd');
+      let frac;
+      if (i === 2) {
+        frac = 1 - clamp(s.rage, 0, 100) / 100;
+        chip.classList.toggle('ready', s.rage >= 100);
+      } else {
+        const rem = Math.max(0, s.cd[i] - t);
+        frac = rem / s.skills[i].cd;
+        chip.classList.toggle('ready', frac <= 0.001);
+      }
+      cdEl.style.transform = 'scaleY(' + clamp(frac, 0, 1).toFixed(3) + ')';
+    }
+  }
+}
+
+/* ============================================================
+   战斗逻辑
+   ============================================================ */
+function pickSkill(s) {
+  if (s.rage >= 100) return { i: 2, sk: s.skills[2] };
+  if (now() >= s.cd[1]) return { i: 1, sk: s.skills[1] };
+  if (now() >= s.cd[0]) return { i: 0, sk: s.skills[0] };
+  return { i: -1, sk: null };
+}
+
+let lastNudge = 0;
+function nudgeRival() {
+  if (now() - lastNudge < 900) return;
+  lastNudge = now();
+  toast('这是对手的角色 · 点你自己的角色出招');
+  S[NET.mySide].el.animate([
+    { transform: 'translateX(0)' },
+    { transform: 'translateX(-8px)' },
+    { transform: 'translateX(8px)' },
+    { transform: 'translateX(0)' },
+  ], { duration: 260, easing: 'ease-out' });
+}
+
+function onFighterClick(k, e) {
+  if (!state.running || state.over) return;
+  const pos = toDesign(e);
+  if (NET.active) {
+    if (k !== NET.mySide) { nudgeRival(); return; }
+    if (NET.role === 'guest') {
+      // 客机只上传输入，出手由主机裁定后广播回来
+      const col = HERO[k].color;
+      ring(pos.x, pos.y, { r0: 5, r1: 62, life: 0.34, color: col, w: 3 });
+      spark(pos.x, pos.y, { n: 6, color: col, speed: 220, life: 0.3, size: 2, g: 120 });
+      netSend({ p: 'input', x: Math.round(pos.x), y: Math.round(pos.y) });
+      return;
+    }
+  }
+  doClick(k, pos);
+}
+
+function doClick(k, p) {
+  if (!state.running || state.over) return;
+  const me = S[k];
+  const foe = S[other(k)];
+  const t = now();
+  if (t < me.nextClickAt) return;
+  me.nextClickAt = t + CFG.clickGate;
+
+  SFX.init(); SFX.resume();
+
+  if (t - me.lastClick <= CFG.comboWindow) me.combo++;
+  else me.combo = 1;
+  me.lastClick = t;
+  if (me.combo > me.maxCombo) me.maxCombo = me.combo;
+  if (state.stats[k]) {
+    state.stats[k].clicks++;
+    if (me.combo > state.stats[k].maxCombo) state.stats[k].maxCombo = me.combo;
+  }
+  updateComboUI(me);
+
+  ring(p.x, p.y, { r0: 5, r1: 64, life: 0.36, color: me.cfg.color, w: 3 });
+  spark(p.x, p.y, { n: 7, color: me.cfg.color, speed: 240, life: 0.32, size: 2.2, g: 120 });
+
+  const pick = pickSkill(me);
+  SFX.cast();
+  const netHost = NET.active && NET.role === 'host';
+
+  if (pick.i === 2) {
+    me.rage = 0;
+    updateRage(me);
+    if (!me.ultBusy) {
+      me.ultBusy = true;
+      state.stats[k].ults++;
+      if (netHost) netSend({ p: 'cast', s: k, i: 2 });
+      castUlt(me, foe, pick.sk);
+    } else {
+      if (netHost) netSend({ p: 'cast', s: k, i: -1 });
+      basicStrike(me, foe);
+    }
+    return;
+  }
+
+  if (pick.i >= 0) {
+    const sk = pick.sk;
+    me.cd[pick.i] = t + sk.cd;
+    me.rage = Math.min(100, me.rage + sk.rage);
+    updateRage(me);
+    fireChip(me, pick.i);
+    if (netHost) netSend({ p: 'cast', s: k, i: pick.i });
+    doSkill(me, foe, sk);
+  } else {
+    me.rage = Math.min(100, me.rage + CFG.basicRage);
+    updateRage(me);
+    if (netHost) netSend({ p: 'cast', s: k, i: -1 });
+    basicStrike(me, foe);
+  }
+}
+
+function fireChip(s, i) {
+  const chip = s.chips[i];
+  if (!chip) return;
+  chip.classList.remove('fire');
+  void chip.offsetWidth;
+  chip.classList.add('fire');
+}
+
+function basicStrike(me, foe) {
+  proj(me, foe, {
+    color: me.cfg.autoColor, r: 7, dur: 260, arc: rand(-40, 40),
+    onHit: () => {
+      impact(foe, me.cfg.autoColor, 0.45);
+      damage(me, foe, rand(CFG.basicDmg[0], CFG.basicDmg[1]), { small: true });
+    },
+  });
+  SFX.whoosh();
+}
+
+function doSkill(me, foe, sk) {
+  SFX.whoosh();
+  if (sk.kind === 'shards') {
+    for (let i = 0; i < 3; i++) {
+      later(() => {
+        const hy = foe.ay + rand(-70, 60);
+        proj(me, foe, {
+          color: sk.color, r: 9, dur: 240, arc: rand(-90, 90) + i * 30,
+          x1: foe.ax + rand(-50, 50), y1: hy,
+          onHit: () => {
+            shardBurst(foe.ax + rand(-40, 40), hy, { n: 7, color: sk.color, speed: 320, size: 8, life: 0.5 });
+            impact(foe, sk.color, 0.55);
+            damage(me, foe, sk.dmg / 3);
+          },
+        });
+      }, i * 75);
+    }
+    return;
+  }
+  if (sk.kind === 'lunge') {
+    dashIn(me, foe, sk.color);
+    later(() => {
+      slashFoe(foe, sk.color, 0.35);
+      impact(foe, '#cfe9ff', 1.15);
+      shardBurst(foe.ax, foe.ay, { n: 16, color: sk.color, speed: 460, size: 10, life: 0.7 });
+      ring(foe.ax, foe.ay, { r0: 10, r1: 230, life: 0.45, color: '#ffffff', w: 5 });
+      shake(11);
+      flash(sk.color, 0.18, 200);
+      SFX.hit(true);
+      damage(me, foe, sk.dmg);
+    }, 170);
+    return;
+  }
+  if (sk.kind === 'arcs') {
+    for (let i = 0; i < 3; i++) {
+      later(() => {
+        slashFoe(foe, i === 2 ? '#ffffff' : sk.color, i === 2 ? 0.5 : 0.3);
+        spark(foe.ax + rand(-60, 60), foe.ay + rand(-80, 60), {
+          n: 9, color: sk.color, speed: 380, life: 0.4, size: 3,
+        });
+        shake(3);
+        SFX.hit(false);
+        damage(me, foe, sk.dmg / 3);
+      }, i * 90);
+    }
+    return;
+  }
+  if (sk.kind === 'lotus') {
+    later(() => {
+      ring(foe.ax, foe.ay, { r0: 20, r1: 300, life: 0.55, color: sk.color, w: 7 });
+      ring(foe.ax, foe.ay, { r0: 12, r1: 180, life: 0.45, color: '#eafff7', w: 3 });
+      petalBurst(foe.ax, foe.ay, { n: 30, color: sk.color, speed: 420, life: 1.1, size: 10 });
+      spark(foe.ax, foe.ay, { n: 26, color: '#eafff7', speed: 300, life: 0.55, size: 3.4 });
+      shake(12);
+      flash(sk.color, 0.16, 240);
+      SFX.hit(true);
+      damage(me, foe, sk.dmg * 0.6);
+    }, 120);
+    later(() => {
+      petalBurst(foe.ax, foe.ay, { n: 18, color: '#ffffff', speed: 300, life: 0.9, size: 8 });
+      damage(me, foe, sk.dmg * 0.4);
+    }, 320);
+    return;
+  }
+}
+
+function slashFoe(foe, color, power) {
+  const ang = rand(-0.85, 0.85);
+  slash(foe.ax + rand(-50, 50), foe.ay + rand(-60, 50), {
+    ang, R: 118 * (0.85 + power), thick: 15 * (0.8 + power), span: 1.25,
+    life: 0.3, color,
+  });
+  slash(foe.ax + rand(-50, 50), foe.ay + rand(-60, 50), {
+    ang: ang + rand(1.2, 2.0), R: 96 * (0.85 + power), thick: 9, span: 1.0,
+    life: 0.24, color: '#ffffff',
+  });
+}
+
+function dashIn(me, foe, color) {
+  const dir = me.key === 'left' ? 1 : -1;
+  me.wrapEl.animate([
+    { transform: 'translate(0,0) scale(1)' },
+    { transform: 'translate(' + (dir * 54) + 'px,-14px) scale(1.05)', offset: 0.34 },
+    { transform: 'translate(0,0) scale(1)' },
+  ], { duration: 360, easing: 'cubic-bezier(.2,.9,.25,1)' });
+  spark(me.ax + dir * 80, me.ay + 20, {
+    n: 18, color, speed: 200, life: 0.45, size: 3,
+    angle: dir > 0 ? Math.PI : 0, spread: 1.1,
+  });
+  ring(me.ax + dir * 60, me.ay, { r0: 10, r1: 120, life: 0.34, color, w: 3 });
+}
+
+function impact(target, color, power) {
+  power = power == null ? 1 : power;
+  const x = target.ax + rand(-55, 55);
+  const y = target.ay + rand(-70, 55);
+  ring(x, y, { r0: 8, r1: 92 * power, life: 0.32, color, w: 4 });
+  ring(x, y, { r0: 4, r1: 46 * power, life: 0.22, color: '#fff', w: 2 });
+  spark(x, y, { n: Math.round(16 * power) + 6, color, speed: 420 * power, life: 0.45, size: 3.4 });
+  spark(x, y, { n: 8, color: '#ffffff', speed: 250, life: 0.3, size: 2.2 });
+  shake(3.5 * power);
+  SFX.hit(false);
+}
+
+function hitReact(target, power, crit) {
+  const dir = target.key === 'left' ? -1 : 1;
+  target.wrapEl.animate([
+    { transform: 'translate(0,0) scale(1)' },
+    { transform: 'translate(' + (dir * 18 * (power || 1)) + 'px, 3px) scale(' + (1 - 0.018 * (power || 1)) + ')', offset: 0.28 },
+    { transform: 'translate(0,0) scale(1)' },
+  ], { duration: 250, easing: 'ease-out' });
+  target.frameEl.animate([
+    { filter: 'brightness(' + (crit ? 3.2 : 2.4) + ') saturate(.25) contrast(1.25)' },
+    { filter: 'brightness(1) saturate(1) contrast(1)' },
+  ], { duration: 210, easing: 'ease-out' });
+  edgeFlash(target.cfg.color, 0.28);
+}
+
+function damage(att, def, base, opts) {
+  opts = opts || {};
+  if (NET.active && NET.role === 'guest') return;
+  if (!state.running || state.over) return;
+  if (def.hp <= 0) return;
+
+  const crit = !opts.ult && !opts.small && Math.random() < CFG.critChance;
+  const mult = 1 + Math.min(att.combo, CFG.maxCombo) * 0.02;
+  let dmg = base * mult * (crit ? 1.75 : 1);
+  dmg = Math.max(1, Math.round(dmg));
+
+  if (NET.active && NET.role === 'host') {
+    netSend({ p: 'hit', s: def.key, d: dmg, c: crit ? 1 : 0, sm: opts.small ? 1 : 0, u: opts.ult ? 1 : 0 });
+  }
+
+  def.hp = Math.max(0, def.hp - dmg);
+  state.stats[att.key].dmg += dmg;
+  updateHp(def);
+
+  const px = def.ax + rand(-130, 80);
+  const py = def.ay + rand(-150, 30);
+  floatText(px, py, String(dmg), opts.ult ? 'ult' : crit ? 'crit' : opts.small ? 'small' : '');
+
+  if (!opts.small) {
+    hitReact(def, crit ? 1.5 : 1, crit);
+    shake(crit ? 9 : 5);
+  }
+  if (crit) { SFX.hit(true); ring(px, py, { r0: 4, r1: 70, life: 0.3, color: '#ffd76a', w: 3 }); }
+
+  if (def.hp <= 0) endBattle(att, def, 'KO');
+}
+
+/* ---------------- 终极技 ---------------- */
+function castUlt(me, foe, sk) {
+  const tk = state.token;
+  state.lastColor = sk.color;
+  state.timeScale = 0.32;
+  cameraZoom(1.045);
+  showBanner(sk.name, sk.sub, sk.color);
+  flash(sk.color, 0.55, 420, { x: me.ax, y: me.ay });
+  edgeFlash(sk.color, 0.7);
+  shake(12);
+  SFX.ultCharge();
+
+  if (sk.style === 'ice') {
+    implode(me.ax, me.ay, { n: 30, R: 300, color: sk.color, big: true });
+    for (let i = 0; i < 3; i++) ring(me.ax, me.ay, {
+      r0: 190 - i * 34, r1: 34, life: 0.85 + i * 0.08,
+      color: 'rgba(160,220,255,.42)', w: 2,
+    });
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      const R = 210;
+      (function (a) {
+        later(() => {
+          const x = me.ax + Math.cos(a) * R;
+          const y = me.ay + Math.sin(a) * R * 0.75;
+          line(x, y, me.ax + Math.cos(a) * 40, me.ay + Math.sin(a) * 40 * 0.75, { life: 0.28, color: sk.color, w: 2 });
+        }, 180 + i * 18);
+      })(a);
+    }
+  } else {
+    implode(me.ax, me.ay, { n: 28, R: 320, color: sk.color });
+    petalBurst(me.ax, me.ay, { n: 22, color: sk.color, speed: 160, life: 1.0, size: 9, g: -20 });
+    for (let i = 0; i < 3; i++) ring(me.ax, me.ay, {
+      r0: 220 - i * 40, r1: 30, life: 0.88 + i * 0.08,
+      color: 'rgba(120,255,200,.4)', w: 2,
+    });
+  }
+
+  wait(600).then(() => {
+    if (tk !== state.token) return;
+    state.timeScale = 1;
+    cameraZoom(1.0);
+
+    const tx = foe.ax, ty = foe.ay;
+    const edgePts = [
+      [-100, 150], [DW * 0.5, -140], [DW + 100, 190], [DW * 0.5, DH + 160],
+    ];
+    for (let i = 0; i < edgePts.length; i++) {
+      const p = edgePts[i];
+      bolt(p[0], p[1], tx, ty, 'rgba(255,255,255,.34)', { jitter: 30, life: 0.22, w: 2.5 });
+      line(p[0], p[1], tx, ty, { life: 0.3, color: sk.color, w: 2 });
+    }
+    if (sk.style === 'ice') {
+      shardBurst(tx, ty, { n: 30, color: sk.color, speed: 600, size: 14, life: 0.9 });
+      shardBurst(tx, ty, { n: 16, color: '#ffffff', speed: 400, size: 9, life: 0.6 });
+      ring(tx, ty, { r0: 10, r1: 400, life: 0.55, color: 'rgba(255,255,255,.6)', w: 6 });
+      ring(tx, ty, { r0: 10, r1: 270, life: 0.42, color: sk.color, w: 4 });
+      flash('#ffffff', 0.9, 340, { x: tx, y: ty });
+    } else {
+      petalBurst(tx, ty, { n: 40, color: sk.color, speed: 620, life: 1.2, size: 12 });
+      petalBurst(tx, ty, { n: 20, color: '#ffffff', speed: 380, life: 0.8, size: 8 });
+      ring(tx, ty, { r0: 10, r1: 410, life: 0.55, color: 'rgba(255,255,255,.5)', w: 6 });
+      ring(tx, ty, { r0: 6, r1: 280, life: 0.45, color: sk.color, w: 4 });
+      flash(sk.color, 0.9, 380, { x: tx, y: ty });
+    }
+    spark(tx, ty, { n: 34, color: '#ffffff', speed: 700, life: 0.55, size: 3.6 });
+    shake(24);
+    SFX.ultBoom();
+
+    damage(me, foe, sk.dmg, { ult: true });
+
+    wait(180).then(() => {
+      if (tk !== state.token) return;
+      me.ultBusy = false;
+      cameraZoom(1);
+    });
+  });
+}
+
+/* ---------------- 收尾 ---------------- */
+function endBattle(winner, loser, kind) {
+  if (state.over) return;
+  if (NET.active && NET.role === 'host') {
+    netSend({ p: 'end', w: winner ? winner.key : '', k: kind, st: state.stats, tl: state.timeLeft });
+  }
+  state.over = true;
+  state.running = false;
+  const tk = state.token;
+
+  if (kind === 'KO' && winner && loser) {
+    state.timeScale = 0.3;
+    cameraZoom(1.05);
+    bigBurst(loser.ax, loser.ay, loser.cfg.color);
+    flash('#ffffff', 0.75, 460);
+    edgeFlash(loser.cfg.color, 0.9);
+    shake(28);
+    floatText(loser.ax, loser.ay - 120, 'K.O.', 'ko');
+    loser.el.classList.add('down');
+    winner.el.classList.add('champion');
+    SFX.ko();
+    setTimeout(() => {
+      if (tk !== state.token) return;
+      state.timeScale = 1;
+      cameraZoom(1);
+      showResult(winner, loser, kind);
+    }, 1600);
+  } else if (kind === 'KO') {
+    showResult(winner, loser, kind);
+  } else {
+    flash('#ffffff', 0.4, 320);
+    shake(10);
+    if (winner) winner.el.classList.add('champion');
+    if (loser && loser !== winner) loser.el.classList.add('down');
+    setTimeout(() => {
+      if (tk !== state.token) return;
+      showResult(winner, loser, kind);
+    }, 800);
+  }
+}
+
+function bigBurst(x, y, color) {
+  shardBurst(x, y, { n: 30, color, speed: 700, size: 13, life: 0.9 });
+  petalBurst(x, y, { n: 10, color, speed: 520, life: 1.0, size: 10 });
+  spark(x, y, { n: 60, color: '#ffffff', speed: 760, life: 0.7, size: 4 });
+  ring(x, y, { r0: 10, r1: 520, life: 0.7, color: '#ffffff', w: 10 });
+  ring(x, y, { r0: 10, r1: 340, life: 0.55, color, w: 6 });
+}
+
+/* ============================================================
+   流程控制
+   ============================================================ */
+let lastT = 0;
+let timerText = '';
+
+function loop(t) {
+  requestAnimationFrame(loop);
+  const raw = lastT ? (t - lastT) / 1000 : 0.016;
+  lastT = t;
+  // 逻辑时钟用真实时间（低帧率也不拖慢倒计时），特效步长做上限保护
+  const clockDt = Math.max(0, Math.min(0.25, raw));
+  const dtReal = Math.min(0.05, raw);
+  const dt = dtReal * state.timeScale;
+
+  if (state.running && !(NET.active && NET.role === 'guest')) updateGame(clockDt);
+  updateFx(dt, dtReal);
+  renderFx(dtReal);
+  updateCam(dtReal);
+  updateChips();
+}
+
+function updateGame(dtReal) {
+  state.timeLeft = Math.max(0, state.timeLeft - dtReal);
+
+  const sec = Math.ceil(state.timeLeft);
+  if (String(sec) !== timerText) {
+    timerText = String(sec);
+    tnumEl.textContent = timerText;
+    timerEl.classList.toggle('warn', sec <= 15);
+  }
+  tfillEl.style.transform = 'scaleX(' + (state.timeLeft / CFG.timeLimit).toFixed(3) + ')';
+
+  const t = now();
+  for (const k of KEYS) {
+    const s = S[k];
+    if (s.combo > 1 && t - s.lastClick > CFG.comboWindow + 150) {
+      s.combo = 0;
+      updateComboUI(s);
+    }
+  }
+
+  for (const k of KEYS) {
+    const s = S[k];
+    if (t >= s.nextAuto && !state.over) {
+      s.nextAuto = t + rand(CFG.autoMin, CFG.autoMax);
+      autoAttack(s, S[other(k)]);
+    }
+  }
+
+  if (state.timeLeft <= 0 && !state.over) judge();
+}
+
+function autoAttack(s, foe) {
+  if (NET.active && NET.role === 'host') netSend({ p: 'cast', s: s.key, i: -2 });
+  proj(s, foe, {
+    color: s.cfg.autoColor, r: 6, dur: 420, arc: rand(-55, 55),
+    onHit: () => {
+      impact(foe, s.cfg.autoColor, 0.3);
+      damage(s, foe, rand(CFG.autoDmg[0], CFG.autoDmg[1]), { small: true, noCrit: true });
+    },
+  });
+}
+
+function judge() {
+  const a = S.left.hp / S.left.maxHp;
+  const b = S.right.hp / S.right.maxHp;
+  if (Math.abs(a - b) < 0.001) {
+    endBattle(null, null, 'DRAW');
+    return;
+  }
+  const winner = a > b ? S.left : S.right;
+  const loser = S[other(winner.key)];
+  endBattle(winner, loser, 'TIME');
+}
+
+function later(fn, ms) {
+  const tk = state.token;
+  setTimeout(() => {
+    if (tk === state.token) fn();
+  }, ms);
+}
+function wait(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+function resetBattle() {
+  state.token++;
+  state.running = false;
+  state.over = false;
+  state.timeScale = 1;
+  state.timeLeft = CFG.timeLimit;
+  state.stats = freshStats();
+  fx.parts.length = 0;
+  fx.rings.length = 0;
+  fx.bolts.length = 0;
+  fx.slashes.length = 0;
+  fx.projs.length = 0;
+  fx.lines.length = 0;
+  floatLayer.innerHTML = '';
+  cam.shake = 0;
+  cam.zoom = 1;
+  cam.zoomTarget = 1;
+  stage.style.transform = 'none';
+  bannerEl.classList.remove('show');
+  buildFighters();
+  ambientInit();
+  timerText = '';
+  tnumEl.textContent = String(CFG.timeLimit);
+  tfillEl.style.transform = 'scaleX(1)';
+  timerEl.classList.remove('warn');
+  for (const k of KEYS) {
+    updateHp(S[k]);
+    updateRage(S[k]);
+  }
+}
+
+function startGame() {
+  SFX.init(); SFX.resume(); SFX.ui();
+  overlayEl.classList.remove('show');
+  resetBattle();
+  const t = now();
+  for (const k of KEYS) {
+    S[k].nextAuto = t + rand(500, 1200);
+    if (!NET.active || k === NET.mySide) {
+      S[k].el.classList.add('attract');
+      setTimeout(() => { if (S[k]) S[k].el.classList.remove('attract'); }, 4200);
+    }
+  }
+  state.running = true;
+  if (!NET.active) restoreSoloHint();
+}
+
+/* ============================================================
+   开始 / 结算界面
+   ============================================================ */
+function showResult(winner, loser, kind) {
+  state.timeScale = 1;
+  cameraZoom(1);
+  const st = state.stats;
+  const L = HERO.left, R = HERO.right;
+  const online = NET.active;
+  if (online) NET.phase = 'result';
+  const iWon = online && winner && winner.key === NET.mySide;
+
+  let avatarHtml, nameHtml, kicker;
+  if (!winner) {
+    kicker = online ? '平 局' : '势 均 力 敌';
+    avatarHtml =
+      '<div class="r-avatar" style="--accent:#5ccbff;--accent2:#2a7dff;--glow:rgba(92,203,255,.5)"><img src="' + L.img + '"></div>' +
+      '<div class="r-avatar" style="--accent:#5af7b8;--accent2:#12d99a;--glow:rgba(90,247,184,.5)"><img src="' + R.img + '"></div>';
+    nameHtml = '<div class="r-name" style="--accent:#ffd76a;--glow:rgba(255,200,90,.5)">平 局</div>' +
+               '<div class="r-quote">两人打成平手，谁也不肯让谁。</div>';
+  } else {
+    const w = HERO[winner.key];
+    kicker = kind === 'KO' ? 'K . O .' : '时 间 到';
+    avatarHtml = '<div class="r-avatar"><img src="' + w.img + '"></div>';
+    if (online) {
+      nameHtml = '<div class="r-name">' + (iWon ? '你 赢 了' : '你 输 了') + '</div>' +
+                 '<div class="r-win">' + w.name + ' · ' + (kind === 'KO' ? '击 倒 获 胜' : '血 量 判 定 胜') + '</div>' +
+                 '<div class="r-quote">' + (iWon ? '这一局，你的手速压过了对面。' : '再来一局？你的鼠标还没答应。') + '</div>';
+    } else {
+      nameHtml = '<div class="r-name">' + w.name + '</div>' +
+                 '<div class="r-win">' + (kind === 'KO' ? '击 倒 获 胜' : '血 量 判 定 胜') + '</div>' +
+                 '<div class="r-quote">' + w.quote + '</div>';
+    }
+  }
+
+  const diff = st.left.clicks - st.right.clicks;
+  let fate;
+  if (online) {
+    const mine = st[NET.mySide] || { clicks: 0, dmg: 0 };
+    const theirs = st[other(NET.mySide)] || { clicks: 0, dmg: 0 };
+    fate = '你出手 <b>' + mine.clicks + '</b> 次 · 造成 <b>' + mine.dmg + '</b> 点伤害' +
+           ' &nbsp;/&nbsp; 对手出手 <b>' + theirs.clicks + '</b> 次 · 造成 <b>' + theirs.dmg + '</b> 点';
+  } else if (!winner) {
+    fate = '命运的天平两端持平，这一战会被两人记很久。';
+  } else if (Math.abs(diff) <= 4) {
+    fate = '你几乎把每一下都平分给了两个人，<b>势均力敌</b>。';
+  } else if (diff > 0) {
+    fate = '你为 <b>吏治壕</b> 多点了 <b>' + diff + '</b> 次，霜锋因此先一步落下。';
+  } else {
+    fate = '你为 <b>理智耗</b> 多点了 <b>' + (-diff) + '</b> 次，青莲因此先一步绽放。';
+  }
+
+  const cell = (v, cls) => '<div class="rs-cell ' + cls + '">' + v + '</div>';
+  const key = (t, s) => '<div class="rs-key">' + t + '<small>' + s + '</small></div>';
+  const buttons = online
+    ? '<button class="btn" id="againBtn">' + (NET.role === 'host' ? '再 来 一 局' : '请 求 再 战') + '</button>' +
+      '<button class="btn hollow" id="netQuitBtn">退 出 联 机</button>'
+    : '<button class="btn" id="againBtn">再 战 一 局</button>' +
+      '<button class="btn hollow" id="backBtn">回 到 首 页</button>';
+
+  overlayEl.innerHTML =
+    '<div class="result">' +
+      '<div class="r-glow" style="background:radial-gradient(circle,' +
+        (winner ? (winner.key === 'left' ? 'rgba(64,168,255,.95)' : 'rgba(48,240,178,.9)') : 'rgba(255,206,100,.85)') +
+        ',transparent 70%)"></div>' +
+      '<div class="r-kicker">' + kicker + '</div>' +
+      '<div class="r-hero ' + (winner ? winner.key : '') + '">' +
+        avatarHtml +
+        '<div class="r-info">' + nameHtml + '</div>' +
+      '</div>' +
+      '<div class="r-stats">' +
+        '<div class="rs-head"><span class="l">吏治壕</span><span class="c">战 报</span><span class="r">理智耗</span></div>' +
+        cell(st.left.clicks, 'l') + key('出 手 次 数', 'CLICKS') + cell(st.right.clicks, 'r') +
+        cell(st.left.dmg, 'l') + key('总 伤 害', 'DAMAGE') + cell(st.right.dmg, 'r') +
+        cell('×' + st.left.maxCombo, 'l') + key('最 高 连 击', 'COMBO') + cell('×' + st.right.maxCombo, 'r') +
+        cell(st.left.ults, 'l') + key('终 极 技', 'ULTS') + cell(st.right.ults, 'r') +
+      '</div>' +
+      '<div class="r-meta">对 决 用 时 ' + Math.max(0, CFG.timeLimit - state.timeLeft).toFixed(1) + ' 秒' +
+        (online ? ' &nbsp;·&nbsp; 房 间 ' + NET.room : '') + '</div>' +
+      '<div class="r-fate">' + fate + '</div>' +
+      '<div class="btn-row">' + buttons + '</div>' +
+    '</div>';
+
+  overlayEl.classList.add('show');
+
+  const againBtn = document.getElementById('againBtn');
+  if (againBtn) {
+    againBtn.addEventListener('click', () => {
+      SFX.init(); SFX.ui();
+      if (!online) { startGame(); return; }
+      if (NET.role === 'host') {
+        netHostStart();
+      } else {
+        netSend({ p: 'rematch' });
+        againBtn.textContent = '已 发 送 请 求…';
+        againBtn.disabled = true;
+        againBtn.style.opacity = '.6';
+        toast('已请求再战，等待房主开始');
+      }
+    });
+  }
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      SFX.ui();
+      overlayEl.innerHTML = startMarkup;
+      overlayEl.classList.add('show');
+      showStartPanel();
+      bindMenu();
+      resetBattle();
+    });
+  }
+  const quitBtn = document.getElementById('netQuitBtn');
+  if (quitBtn) {
+    quitBtn.addEventListener('click', () => {
+      SFX.ui();
+      netExit(true);
+    });
+  }
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+const startMarkup = overlayEl.innerHTML;
+
+/* ============================================================
+   联机（局域网 / Radmin · 主机权威）
+   ============================================================ */
+const NET = {
+  active: false, role: null, mySide: null, room: '', ws: null,
+  connected: false, connecting: false, phase: 'idle', ping: 0, pingSeen: false,
+  snapTimer: null, pingTimer: null, quit: false, escAt: 0,
+};
+
+function netEl(id) { return document.getElementById(id); }
+
+function netMsg(text, cls) {
+  const el = netEl('netMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'net-msg' + (cls ? ' ' + cls : '');
+}
+function netWaitMsgSet(text, cls) {
+  const el = netEl('netWaitMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'net-msg' + (cls ? ' ' + cls : '');
+}
+function netReadyMsgSet(text) {
+  const el = netEl('netReadyMsg');
+  if (!el) return;
+  el.textContent = text;
+}
+
+let toastTimer = 0;
+function toast(text) {
+  const el = netEl('toast');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
+}
+
+function showCard(name) {
+  const map = { setup: 'netSetup', wait: 'netWait', ready: 'netReady' };
+  for (const k in map) {
+    const el = netEl(map[k]);
+    if (el) el.hidden = (k !== name);
+  }
+}
+
+function showNetPanel() {
+  const si = netEl('startInner'), ni = netEl('netInner');
+  if (!si || !ni) return;
+  si.hidden = true;
+  ni.hidden = false;
+  const row = netEl('netAddrRow');
+  if (row) row.hidden = /^https?:$/.test(location.protocol);
+  showCard(NET.phase === 'ready' ? 'ready' : NET.phase === 'waiting' ? 'wait' : 'setup');
+}
+
+function showStartPanel() {
+  const si = netEl('startInner'), ni = netEl('netInner');
+  if (si) si.hidden = false;
+  if (ni) ni.hidden = true;
+}
+
+function netServerUrl() {
+  if (/^https?:$/.test(location.protocol)) {
+    return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
+  }
+  let v = '';
+  const input = netEl('srvInput');
+  if (input) v = (input.value || '').trim();
+  if (!v) v = '127.0.0.1:8080';
+  if (!/^wss?:\/\//i.test(v)) v = 'ws://' + v;
+  v = v.replace(/\/+$/, '');
+  if (!/\/ws$/i.test(v)) v += '/ws';
+  return v;
+}
+
+function netSend(obj) {
+  const ws = NET.ws;
+  if (!ws || ws.readyState !== 1) return;
+  try { ws.send(JSON.stringify(obj)); } catch (e) {}
+}
+
+function netConnect(onOpen) {
+  netShutdown();
+  NET.quit = false;
+  let ws;
+  const url = netServerUrl();
+  try { ws = new WebSocket(url); } catch (e) { netMsg('地址无效：' + url, 'err'); return; }
+  NET.ws = ws;
+  NET.connecting = true;
+  netMsg('正在连接 ' + url + ' …');
+  const timer = setTimeout(() => {
+    if (ws.readyState !== 1) {
+      try { ws.close(); } catch (e) {}
+      NET.connecting = false;
+      netMsg('连接超时：确认房主已运行「启动联机.bat」，地址与端口正确', 'err');
+    }
+  }, 7000);
+  ws.onopen = () => {
+    clearTimeout(timer);
+    NET.connected = true;
+    NET.connecting = false;
+    netMsg('已连接服务器', 'ok');
+    if (onOpen) onOpen();
+  };
+  ws.onmessage = (ev) => {
+    let m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    netOnMessage(m);
+  };
+  ws.onclose = () => {
+    const wasActive = NET.active;
+    NET.connected = false;
+    NET.connecting = false;
+    if (NET.quit) return;
+    if (wasActive) { netFatal('与对手的连接已断开'); }
+    else if (NET.phase === 'waiting' || NET.phase === 'ready') { netMsg('连接已断开', 'err'); NET.phase = 'idle'; showCard('setup'); }
+  };
+  ws.onerror = () => {};
+}
+
+function netShutdown() {
+  NET.quit = true;
+  if (NET.ws) { try { NET.ws.close(); } catch (e) {} }
+  NET.ws = null;
+  NET.connected = false;
+  NET.connecting = false;
+  clearInterval(NET.snapTimer);
+  clearInterval(NET.pingTimer);
+  NET.snapTimer = null;
+  NET.pingTimer = null;
+}
+
+function netCreate() {
+  if (NET.connected) { netSend({ p: 'create' }); netMsg('正在创建房间…'); return; }
+  netConnect(() => { netSend({ p: 'create' }); netMsg('正在创建房间…'); });
+}
+
+function netJoin() {
+  const input = netEl('codeInput');
+  const code = ((input && input.value) || '').replace(/\D/g, '').slice(0, 4);
+  if (code.length !== 4) { netMsg('请输入 4 位房间号', 'err'); return; }
+  if (NET.connected) { netSend({ p: 'join', code }); netMsg('正在加入房间…'); return; }
+  netConnect(() => { netSend({ p: 'join', code }); netMsg('正在加入房间…'); });
+}
+
+function netOnMessage(m) {
+  switch (m.p) {
+    case 'pong':
+      NET.ping = Math.max(0, Date.now() - m.t);
+      NET.pingSeen = true;
+      updateNetHud();
+      break;
+    case 'room':
+      netOnRoom(m);
+      break;
+    case 'peer':
+      if (m.on) netOnPeerReady(); else netOnPeerLeft();
+      break;
+    case 'input':
+      if (NET.role === 'host' && NET.phase === 'battle') doClick('right', { x: m.x, y: m.y });
+      break;
+    case 'cast':
+      netPlayCast(m);
+      break;
+    case 'hit':
+      netApplyHit(m);
+      break;
+    case 'snap':
+      netApplySnap(m);
+      break;
+    case 'start':
+      if (NET.role === 'guest') startOnlineBattle();
+      break;
+    case 'end':
+      netRemoteEnd(m);
+      break;
+    case 'rematch':
+      if (NET.role === 'host') {
+        toast('对手发起了再战');
+        if (NET.phase === 'result') netHostStart();
+      }
+      break;
+    case 'err':
+      netMsg(m.msg || '操作失败', 'err');
+      break;
+    default:
+      break;
+  }
+}
+
+function netOnRoom(m) {
+  NET.active = true;
+  NET.role = m.role;
+  NET.mySide = m.role === 'host' ? 'left' : 'right';
+  NET.room = m.code;
+  NET.phase = 'waiting';
+  const codeEl = netEl('roomCode');
+  if (codeEl) codeEl.textContent = m.code;
+  showCard('wait');
+  if (m.role === 'guest') netWaitMsgSet('已进入房间，等待对手开始…', 'ok');
+  netStartPing();
+}
+
+function netOnPeerReady() {
+  NET.phase = 'ready';
+  showCard('ready');
+  const isHost = NET.role === 'host';
+  const t1 = netEl('netReadyTitle');
+  if (t1) t1.textContent = isHost ? '对 手 已 就 位' : '已 进 入 房 间';
+  const me = netEl('netMe');
+  const rival = netEl('netRival');
+  if (me) me.textContent = HERO[NET.mySide].name + '（你）';
+  if (rival) rival.textContent = HERO[other(NET.mySide)].name + '（对手）';
+  netReadyMsgSet(isHost
+    ? '你操控「' + HERO.left.name + '」，点击他开始对战'
+    : '等待房主开始 · 你将操控「' + HERO[NET.mySide].name + '」');
+  const startBtn = netEl('netStartBtn');
+  if (startBtn) startBtn.hidden = !isHost;
+  toast(isHost ? '对手已加入房间' : '已进入房间');
+}
+
+function netOnPeerLeft() {
+  const inBattle = NET.phase === 'battle' || NET.phase === 'result';
+  toast('对手已离开房间');
+  netExit(true);
+  showNetPanel();
+  netMsg('对手已离开房间', inBattle ? 'err' : 'err');
+}
+
+function netFatal(text) {
+  toast(text);
+  clearInterval(NET.snapTimer);
+  NET.snapTimer = null;
+  if (NET.phase === 'battle' || NET.phase === 'result') {
+    setTimeout(() => { if (NET.active) netExit(true); }, 1500);
+  }
+}
+
+function netHostStart() {
+  if (NET.role !== 'host') return;
+  netSend({ p: 'start', t: Date.now() });
+  startOnlineBattle();
+}
+
+function startOnlineBattle() {
+  NET.phase = 'battle';
+  startGame();
+  decorateOnline();
+  if (NET.role === 'host') netStartSnapshots();
+  updateNetHud();
+}
+
+function decorateOnline() {
+  for (const k of KEYS) {
+    const el = S[k].el;
+    el.classList.remove('attract');
+    el.classList.toggle('mine', k === NET.mySide);
+    el.classList.toggle('rival', k !== NET.mySide);
+    const hint = el.querySelector('.clickhint');
+    if (hint) hint.textContent = k === NET.mySide ? '你 的 角 色 · 点 击 出 招' : '对 手 操 控';
+  }
+  const bh = document.querySelector('.bottom-hint');
+  if (bh) {
+    bh.innerHTML = '<span>点击<b>你的角色</b>出招</span><i class="dotsep"></i>' +
+      '<span>怒气满格释放<b>终极技</b></span><i class="dotsep"></i>' +
+      '<span>对手在另一台电脑上 · <b>ESC</b> 两次退出</span>';
+  }
+}
+function restoreSoloHint() {
+  const bh = document.querySelector('.bottom-hint');
+  if (bh) {
+    bh.innerHTML = '<span>点击<b>左右角色</b>出招</span><i class="dotsep"></i>' +
+      '<span>怒气满格释放<b>终极技</b></span><i class="dotsep"></i>' +
+      '<span>连击越高伤害越猛</span>';
+  }
+}
+
+function netStartSnapshots() {
+  clearInterval(NET.snapTimer);
+  NET.snapTimer = setInterval(() => {
+    if (!NET.active || NET.role !== 'host' || !state.running) return;
+    const L = S.left, R = S.right, t = now();
+    netSend({
+      p: 'snap',
+      tl: +state.timeLeft.toFixed(2),
+      lh: Math.round(L.hp), lr: Math.round(L.rage), lc: L.combo,
+      rh: Math.round(R.hp), rr: Math.round(R.rage), rc: R.combo,
+      dl: [Math.max(0, Math.round(L.cd[0] - t)), Math.max(0, Math.round(L.cd[1] - t))],
+      dr: [Math.max(0, Math.round(R.cd[0] - t)), Math.max(0, Math.round(R.cd[1] - t))],
+    });
+  }, 60);
+}
+
+function netStartPing() {
+  clearInterval(NET.pingTimer);
+  NET.pingTimer = setInterval(() => {
+    if (NET.connected) netSend({ p: 'ping', t: Date.now() });
+  }, 2500);
+  netSend({ p: 'ping', t: Date.now() });
+}
+
+function updateNetHud() {
+  const el = netEl('netHud');
+  const txt = netEl('netHudTxt');
+  if (!el) return;
+  if (!NET.active) { el.classList.remove('show'); return; }
+  el.classList.add('show');
+  el.classList.toggle('lag', NET.ping > 150);
+  if (txt) {
+    const side = HERO[NET.mySide] ? HERO[NET.mySide].name : '';
+    const lag = NET.pingSeen ? (NET.ping < 1 ? '<1' : NET.ping) + 'ms' : '联机中';
+    txt.textContent = '房间 ' + NET.room + ' · ' + side + ' · ' + lag;
+  }
+}
+
+/* ---- 客机：播放主机广播过来的战斗表现 ---- */
+function netPlayCast(m) {
+  if (NET.role !== 'guest') return;
+  const me = S[m.s], foe = S[other(m.s)];
+  if (!me || !foe) return;
+  if (m.i === 2) {
+    if (!me.ultBusy) { me.ultBusy = true; castUlt(me, foe, me.skills[2]); }
+  } else if (m.i >= 0) {
+    fireChip(me, m.i);
+    me.cd[m.i] = now() + me.skills[m.i].cd;
+    doSkill(me, foe, me.skills[m.i]);
+  } else if (m.i === -2) {
+    autoAttack(me, foe);
+  } else {
+    basicStrike(me, foe);
+  }
+  SFX.cast();
+}
+
+function netApplyHit(m) {
+  if (NET.role !== 'guest') return;
+  const def = S[m.s];
+  if (!def) return;
+  def.hp = Math.max(0, def.hp - m.d);
+  updateHp(def);
+  const px = def.ax + rand(-130, 80);
+  const py = def.ay + rand(-150, 30);
+  floatText(px, py, String(m.d), m.u ? 'ult' : m.c ? 'crit' : m.sm ? 'small' : '');
+  if (!m.sm) { hitReact(def, m.c ? 1.5 : 1, !!m.c); shake(m.c ? 9 : 5); }
+  if (m.c) { SFX.hit(true); ring(px, py, { r0: 4, r1: 70, life: 0.3, color: '#ffd76a', w: 3 }); }
+}
+
+function netApplySnap(m) {
+  if (NET.role !== 'guest') return;
+  if (typeof m.tl === 'number') state.timeLeft = m.tl;
+  applySnapSide(S.left, m.lh, m.lr, m.lc, m.dl);
+  applySnapSide(S.right, m.rh, m.rr, m.rc, m.dr);
+  const sec = Math.max(0, Math.ceil(state.timeLeft));
+  if (String(sec) !== timerText) {
+    timerText = String(sec);
+    tnumEl.textContent = timerText;
+    timerEl.classList.toggle('warn', sec <= 15);
+  }
+  tfillEl.style.transform = 'scaleX(' + Math.max(0, Math.min(1, state.timeLeft / CFG.timeLimit)).toFixed(3) + ')';
+}
+
+function applySnapSide(s, hp, rage, combo, cdRem) {
+  if (typeof hp === 'number' && hp !== Math.round(s.hp)) { s.hp = hp; updateHp(s); }
+  if (typeof rage === 'number' && Math.round(rage) !== Math.round(s.rage)) { s.rage = rage; updateRage(s); }
+  if (typeof combo === 'number' && combo !== s.combo) { s.combo = combo; updateComboUI(s); }
+  if (cdRem && cdRem.length >= 2) {
+    const t = now();
+    s.cd[0] = t + (cdRem[0] || 0);
+    s.cd[1] = t + (cdRem[1] || 0);
+  }
+}
+
+function netRemoteEnd(m) {
+  if (NET.role !== 'guest') return;
+  if (typeof m.tl === 'number') state.timeLeft = m.tl;
+  if (m.st) state.stats = m.st;
+  const winner = m.w ? S[m.w] : null;
+  const loser = winner ? S[other(winner.key)] : null;
+  if (loser) { loser.hp = 0; updateHp(loser); }
+  NET.phase = 'result';
+  endBattle(winner, loser, m.k || 'KO');
+}
+
+function netExit(toMenu) {
+  netShutdown();
+  const wasActive = NET.active;
+  NET.active = false;
+  NET.role = null;
+  NET.mySide = null;
+  NET.room = '';
+  NET.phase = 'idle';
+  NET.ping = 0;
+  NET.pingSeen = false;
+  const hud = netEl('netHud');
+  if (hud) hud.classList.remove('show');
+  if (toMenu) {
+    overlayEl.innerHTML = startMarkup;
+    overlayEl.classList.add('show');
+    showStartPanel();
+    bindMenu();
+    resetBattle();
+  }
+  if (wasActive) toast('已退出联机');
+}
+
+/* ---- 联机大厅按钮 ---- */
+function bindMenu() {
+  const on = (id, fn) => { const el = netEl(id); if (el) el.addEventListener('click', fn); };
+  on('startBtn', startGame);
+  on('netBtn', () => { SFX.init(); SFX.ui(); showNetPanel(); });
+  on('createBtn', () => { SFX.init(); netCreate(); });
+  on('joinBtn', () => { SFX.init(); netJoin(); });
+  on('cancelBtn', () => {
+    netShutdown();
+    NET.active = false; NET.role = null; NET.mySide = null; NET.phase = 'idle'; NET.room = '';
+    showCard('setup');
+    netMsg('已取消房间');
+  });
+  on('netStartBtn', netHostStart);
+  on('netLeaveBtn', () => { netExit(false); showNetPanel(); netMsg('已退出房间'); });
+  on('netBackBtn', () => { netExit(false); showStartPanel(); });
+  const code = netEl('codeInput');
+  if (code) {
+    code.addEventListener('input', () => { code.value = code.value.replace(/\D/g, '').slice(0, 4); });
+    code.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); netJoin(); }
+    });
+  }
+  const srv = netEl('srvInput');
+  if (srv) srv.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } });
+}
+
+soundBtn.addEventListener('click', () => {
+  SFX.init();
+  SFX.muted = !SFX.muted;
+  soundBtn.textContent = SFX.muted ? '🔇' : '🔊';
+  if (!SFX.muted) { SFX.resume(); SFX.ui(); }
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape' && NET.active && (NET.phase === 'battle' || NET.phase === 'result')) {
+    if (now() - NET.escAt < 2400) {
+      netSend({ p: 'leave' });
+      NET.escAt = 0;
+      netExit(true);
+      toast('已退出联机');
+    } else {
+      NET.escAt = now();
+      toast('再按一次 ESC 退出联机');
+    }
+    return;
+  }
+  const tag = e.target && e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Enter' || e.code === 'Space') {
+    if (!overlayEl.classList.contains('show')) return;
+    const si = document.getElementById('startInner');
+    if (si && si.hidden) return;
+    const b = document.getElementById('startBtn') || document.getElementById('againBtn');
+    if (b) { e.preventDefault(); b.click(); }
+  }
+});
+
+window.addEventListener('resize', () => { fit(); sizeCanvas(); if (S.left) anchors(); });
+
+/* 视差 */
+document.addEventListener('pointermove', (e) => {
+  const r = design.getBoundingClientRect();
+  const nx = (e.clientX - r.left) / r.width - 0.5;
+  const ny = (e.clientY - r.top) / r.height - 0.5;
+  for (const k of KEYS) {
+    if (!S[k]) continue;
+    const pel = S[k].el.querySelector('.parallax');
+    if (!pel) continue;
+    const dir = k === 'left' ? 1 : -1;
+    pel.style.transform = 'perspective(1400px) rotateY(' + (nx * -8 * dir + dir * 5).toFixed(2) + 'deg) rotateX(' + (ny * 6).toFixed(2) + 'deg)';
+  }
+});
+
+sizeCanvas();
+fit();
+buildFighters();
+ambientInit();
+bindMenu();
+requestAnimationFrame(loop);
+
+/* 演示模式（截图 / 预览用）：?demo=1 只暴露调试接口，?demo=auto 自动开打 */
+const params = new URLSearchParams(location.search);
+if (params.has('demo')) {
+  window.__demo = {
+    S: () => S, state, startGame, resetBattle, click: onFighterClick,
+    net: NET, doClick, netCreate, netJoin, netHostStart, netExit,
+  };
+}
+if (params.get('demo') === 'auto') {
+  setTimeout(() => {
+    startGame();
+    let n = 0;
+    setInterval(() => {
+      const k = (n++ % 2 === 0) ? 'left' : 'right';
+      const s = S[k];
+      if (!s) return;
+      const r = design.getBoundingClientRect();
+      const sc = r.width / DW;
+      onFighterClick(k, {
+        clientX: r.left + s.ax * sc,
+        clientY: r.top + s.ay * sc,
+        preventDefault(){},
+      });
+    }, 150);
+    setTimeout(() => { if (S.left) { S.left.rage = 100; updateRage(S.left); } }, 900);
+  }, 120);
+}
+
+})();
+</script>
+</body>
+</html>
